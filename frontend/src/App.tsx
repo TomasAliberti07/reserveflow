@@ -1,9 +1,7 @@
+import { AppRouter } from './routes/AppRouter';
+
 function App() {
-  return (
-    <div>
-      <h1>ReserveFlow</h1>
-    </div>
-  );
+  return <AppRouter />;
 }
 
 export default App;

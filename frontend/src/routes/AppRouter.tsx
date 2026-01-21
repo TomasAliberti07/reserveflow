@@ -9,10 +9,10 @@ export function AppRouter() {
     <BrowserRouter>
       <Routes>
         {/* Public */}
-        <Route path="/login" element={<Login />} />
+        <Route path="/" element={<Login />} />
 
         {/* Private */}
-        <Route path="/" element={<Dashboard />} />
+        <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/salons" element={<Salons />} />
         <Route path="/events" element={<Events />} />
       </Routes>

@@ -1,9 +1,30 @@
 .login-container {
   min-height: 100vh;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
 }
+.login-title {
+  margin-bottom: 2rem;
+  font-size: 3rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+
+  background: linear-gradient(
+    90deg,
+    #1e3a8a, 
+    #020617  
+  );
+
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+
+  background-clip: text;
+  color: transparent;
+}
+
+
 .login-container .login-card {
   width: 100%;
   max-width: 420px;
@@ -11,11 +32,21 @@
 
   background: linear-gradient(
     180deg,
-    #1e293b,
-    #0f172a
-  );
+    rgba(55, 65, 81, 0.85),
+    rgba(2, 6, 23, 0.9)
+    );
 
   border-radius: 12px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
   border: 1px solid rgba(255, 255, 255, 0.05);
 }
+.login-form-title {
+  margin-bottom: 1rem;
+
+  font-size: 1rem;
+  font-weight: 500;
+
+  color: #f8fafc;
+  text-shadow: 0 0 4px rgba(59, 130, 246, 0.35);
+}
+

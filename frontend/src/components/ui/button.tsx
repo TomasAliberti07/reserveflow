@@ -1,4 +1,5 @@
 import '../../styles/button.css';
+
 type ButtonProps = {
   children: React.ReactNode;
   type?: 'button' | 'submit';
@@ -6,7 +7,7 @@ type ButtonProps = {
 
 export function Button({ children, type = 'button' }: ButtonProps) {
   return (
-    <button type={type} className="btn-primary">
+    <button type={type} className="ui-button">
       {children}
     </button>
   );

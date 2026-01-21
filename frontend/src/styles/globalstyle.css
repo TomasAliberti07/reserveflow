@@ -1,18 +1,11 @@
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-html,
-body,
-#root {
-  height: 100%;
-}
-
-
 body {
-  background-color: #0f172a; /* ejemplo */
+  min-height: 100vh;
+
+  background: linear-gradient(
+    180deg,
+    rgba(93, 93, 97, 0.95),  
+    rgba(1, 6, 26, 0.95)  
+  );
+
   font-family: system-ui, sans-serif;
 }

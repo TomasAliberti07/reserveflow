@@ -24,7 +24,7 @@ export class User {
   telefono: string;
 
   @Column()
-  password_has: string;
+  password_hash: string;
 
   @Column({ type: 'boolean', default: true })
   estado: boolean;

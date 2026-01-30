@@ -6,6 +6,7 @@ import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
 import { SalonsModule } from './salons/salons.module';
 import { EventsModule } from './events/events.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -18,13 +19,14 @@ import { EventsModule } from './events/events.module';
       port: 3306,
       username: "root",
       password: "TRIMLY2025",
-      database: "reserveflow",
+      database: "reserve",
       autoLoadEntities: true,
       synchronize: false,
     }),
     UsersModule,
     SalonsModule,
     EventsModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Input } from "../../components/ui/input";
 import { Button } from "../../components/ui/button";
 import "../../styles/login.card.css";
+import { registerUser } from "../../api/auth.api";
 
 interface CrearCuentaModalProps {
   open: boolean;
@@ -20,6 +21,30 @@ export default function CrearCuentaModal({
   const [telefono, setTelefono] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const handleSubmit = async () => {
+  if (password !== confirmPassword) {
+    alert("Las contraseñas no coinciden");
+    return;
+  }
+
+  try {
+    await registerUser({
+      nombre,
+      apellido,
+      email,
+      telefono,
+      password,
+    });
+
+    alert("Cuenta creada correctamente");
+    onClose();
+  } catch (error: any) {
+    alert(
+      error.response?.data?.message || "Error al crear la cuenta"
+    );
+  }
+};
+
 
   return (
     <div className="modal-overlay">
@@ -73,7 +98,9 @@ export default function CrearCuentaModal({
         </small>
 
         <div className="modal-actions">
-          <Button type="submit">Crear cuenta</Button>
+          <Button type="button" onClick={handleSubmit}>
+           Crear cuenta
+          </Button>
 
           <button className="link-button" onClick={onClose}>
             Cancelar

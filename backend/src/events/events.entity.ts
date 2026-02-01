@@ -9,7 +9,7 @@ import {
 } from 'typeorm';
 import { Salon } from '../salons/salons.entity';
 
-@Entity('events')
+@Entity('evento')
 export class Event {
   @PrimaryGeneratedColumn()
   id: number;

@@ -4,7 +4,9 @@ import type { ChangeEvent } from "react";
 export interface InputProps {
   label: string;
   type?: string;
+  placeholder?: string;
   value?: string;
+  maxLength?: number;
   onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
 }
 

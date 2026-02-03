@@ -3,6 +3,7 @@ import { Input } from "../../components/ui/input";
 import { Button } from "../../components/ui/button";
 import "../../styles/login.card.css";
 import { registerUser } from "../../api/auth.api";
+import Popup from "../../components/ui/popup";
 
 interface CrearCuentaModalProps {
   open: boolean;
@@ -37,6 +38,11 @@ export default function CrearCuentaModal({
   password?: string;
   confirmPassword?: string;
   }>({});
+  const [popupOpen, setPopupOpen] = useState(false);
+  const [popupMessage, setPopupMessage] = useState("");
+  const [popupTitle, setPopupTitle] = useState<string | undefined>(undefined);
+  const [popupType, setPopupType] =
+  useState<"success" | "error" | "info">("info");
 
 const handleSubmit = async () => {
   const newErrors: typeof errors = {};
@@ -76,24 +82,27 @@ const handleSubmit = async () => {
   // Limpia errores si pasa todo
   setErrors({});
 
-  try {
+    try {
     await registerUser({
-      nombre,
-      apellido,
-      email,
-      telefono,
-      password,
+    nombre,
+    apellido,
+    email,
+    telefono,
+    password,
     });
 
-    alert("Cuenta creada correctamente");
-    onClose();
+    setPopupTitle("Cuenta creada");
+    setPopupMessage("Tu cuenta se creó correctamente");
+    setPopupType("success");
+    setPopupOpen(true);
   } catch (error: any) {
-    alert(error.response?.data?.message || "Error al crear la cuenta");
-  }
-};
-
-
-
+    setPopupTitle("Error");
+    setPopupMessage(
+    error.response?.data?.message || "Error al crear la cuenta"
+    );
+    setPopupType("error");
+    setPopupOpen(true);
+  }};
 
   return (
     <div className="modal-overlay">
@@ -176,7 +185,21 @@ const handleSubmit = async () => {
             Cancelar
           </button>
         </div>
+         <Popup
+          open={popupOpen}
+          title={popupTitle}
+          message={popupMessage}
+          type={popupType}
+          onClose={() => {
+          setPopupOpen(false);
+          if (popupType === "success") {
+          onClose();
+          }
+        }}
+        />
       </div>
-    </div>
+    </div>  
   );
 }
+
+// Siguen sin verse los placeholders y no se limitian la cantidad de caracteres en nombre,apellido y telefono

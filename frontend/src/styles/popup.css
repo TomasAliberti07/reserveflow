@@ -1,0 +1,42 @@
+.popup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.popup-card {
+  background: #0f172a;
+  padding: 1.5rem;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 400px;
+  text-align: center;
+}
+
+.popup-title {
+  color: white;
+  margin-bottom: 0.5rem;
+}
+
+.popup-message {
+  color: #cbd5f5;
+  margin-bottom: 1.25rem;
+  font-size: 0.9rem;
+}
+
+/* Variantes */
+.popup-card.success {
+  border: 1px solid #22c55e;
+}
+
+.popup-card.error {
+  border: 1px solid #ef4444;
+}
+
+.popup-card.info {
+  border: 1px solid #3b82f6;
+}

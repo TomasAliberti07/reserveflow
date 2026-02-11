@@ -1,8 +1,17 @@
+import React from "react";
 import DashboardLayout from "../layouts/dashboard";
-export default function Dashboard() {
+import DashboardHeader from "../features/dashboard/DashboardHeader";
+import DashboardStats from "../features/dashboard/DashboardStats";
+
+const Dashboard: React.FC = () => {
   return (
-   <DashboardLayout>
-      <h1>Dashboard</h1>
+    <DashboardLayout>
+      <div className="p-6">
+        <DashboardHeader />
+        <DashboardStats />
+      </div>
     </DashboardLayout>
   );
-}
+};
+
+export default Dashboard;

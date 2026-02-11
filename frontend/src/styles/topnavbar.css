@@ -1,10 +1,58 @@
 .top-navbar {
-  height: 60px;
-  background: #0b0f1a;
+  height: 75px; /* más alto */
   display: flex;
   align-items: center;
-  gap: 30px;
-  padding: 0 30px;
-  color: white;
+  justify-content: space-between;
+  padding: 0 40px; /* más aire lateral */
+  background-color: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(6px);
+}
+
+.navbar-left {
   font-size: 20px;
+  font-weight: bold;
+  color: white;
+}
+
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 35px; /* más separación entre iconos */
+}
+
+.navbar-icon {
+  position: relative;
+  cursor: pointer;
+  color: #e2e8f0;
+  transition: 0.2s ease;
+}
+
+.navbar-icon svg {
+  width: 26px;   /* iconos más grandes */
+  height: 26px;
+}
+
+.navbar-icon:hover {
+  color: white;
+  transform: scale(1.1);
+}
+.navbar-icon::after {
+  content: attr(data-label);
+  position: absolute;
+  bottom: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #1e293b;
+  color: white;
+  padding: 4px 10px;
+  font-size: 12px;
+  border-radius: 6px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  white-space: nowrap;
+}
+
+.navbar-icon:hover::after {
+  opacity: 1;
 }

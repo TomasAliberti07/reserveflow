@@ -1,16 +1,6 @@
 .grid-container {
   display: grid;
   gap: 28px;
-}
 
-@media (max-width: 1200px) {
-  .grid-container {
-    grid-template-columns: repeat(2, 1fr) !important;
-  }
-}
-
-@media (max-width: 768px) {
-  .grid-container {
-    grid-template-columns: 1fr !important;
-  }
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
 }

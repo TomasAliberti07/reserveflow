@@ -3,21 +3,21 @@ import Grid from "../../components/ui/grid";
 
 const DashboardStats: React.FC = () => {
   return (
-    <Grid columns={4}>
+    <Grid>
       <Card title="Salones">
-        <p className="stat-value">0</p>
+        <p className="card-content">Proximamente</p>
       </Card>
 
-      <Card title="Eventos Activos">
-        <p className="stat-value">0</p>
+      <Card title="Próximos eventos">
+        <p className="card-content">Proximamente</p>
       </Card>
 
-      <Card title="Reservas">
-        <p className="stat-value">0</p>
+      <Card title="Faltantes del evento">
+        <p className="card-content">Proximamente</p>
       </Card>
 
-      <Card title="Ingresos">
-        <p className="stat-value">$0</p>
+      <Card title="Stock bajo">
+        <p className="card-content">Proximamente</p>
       </Card>
     </Grid>
   );

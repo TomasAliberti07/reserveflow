@@ -7,6 +7,7 @@ import { UsersModule } from './users/users.module';
 import { SalonsModule } from './salons/salons.module';
 import { EventsModule } from './events/events.module';
 import { AuthModule } from './auth/auth.module';
+import { BebidaModule } from './bebida/bebida.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { AuthModule } from './auth/auth.module';
     SalonsModule,
     EventsModule,
     AuthModule,
+    BebidaModule,
   ],
   controllers: [AppController],
   providers: [AppService],

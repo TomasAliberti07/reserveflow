@@ -1,0 +1,73 @@
+/* BebidaDashboard Styles */
+
+.bebida-dashboard {
+  padding: 2rem;
+}
+
+.bebida-dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.bebida-dashboard-title {
+  margin: 0;
+  color: #fff;
+}
+
+.bebida-dashboard-button {
+  width: auto;
+}
+
+
+.bebida-dashboard-hr {
+  margin: 2rem 0;
+  border-color: #444;
+}
+
+.bebida-dashboard-search {
+  margin-bottom: 1.5rem;
+  max-width: 400px;
+}
+
+.bebida-dashboard-search-input {
+  width: 100%;
+  padding: 0.75rem;
+  background-color: #222;
+  color: #fff;
+  border: 1px solid #555;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+}
+
+.bebida-dashboard-inventory-title {
+  color: #aaa;
+  margin-bottom: 1rem;
+}
+
+.bebida-dashboard-card {
+  background-color: #222;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid #444;
+}
+
+.bebida-dashboard-card-title {
+  margin: 0 0 0.5rem 0;
+  color: #fff;
+}
+
+.bebida-dashboard-card-details {
+  font-size: 0.9rem;
+  color: #ccc;
+}
+
+.bebida-dashboard-card-detail {
+  margin: 0.2rem 0;
+}
+
+.bebida-dashboard-no-results {
+  text-align: center;
+  color: #888;
+}

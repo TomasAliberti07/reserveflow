@@ -3,7 +3,7 @@ import { Button } from "../../components/ui/button";
 import Grid from "../../components/ui/grid"; 
 
 import BebidaStats from "./bebidastats";
-import BebidaForm from "./bebidaform";
+import AgregarBebida from "./agregarbebida";
 import "../../styles/bebidadashboard.css";
 
 export default function BebidaDashboard() {
@@ -35,22 +35,18 @@ export default function BebidaDashboard() {
     <div className="bebida-dashboard">
       <div className="bebida-dashboard-header">
         <h1 className="bebida-dashboard-title">Gestión de Bebidas</h1>
-        <Button onClick={() => setMostrarFormulario(!mostrarFormulario)} className="bebida-dashboard-button">
-          {mostrarFormulario ? "Cancelar" : "+ Agregar"}
+        <Button onClick={() => setMostrarFormulario(true)} className="bebida-dashboard-button">
+          + Agregar
         </Button>
       </div>
 
-      <Grid cols={mostrarFormulario ? 2 : 1} gap={4} className="bebida-dashboard-grid">
+      <Grid cols={1} gap={4} className="bebida-dashboard-grid">
         <div>
           <BebidaStats bebidas={bebidas} />
         </div>
-        
-        {mostrarFormulario && (
-          <div>
-            <BebidaForm onSubmit={agregarBebida} />
-          </div>
-        )}
       </Grid>
+
+      <AgregarBebida open={mostrarFormulario} onClose={() => setMostrarFormulario(false)} onSubmit={agregarBebida} />
 
       <hr className="bebida-dashboard-hr" />
       

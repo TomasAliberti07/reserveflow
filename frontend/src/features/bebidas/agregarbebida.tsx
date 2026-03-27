@@ -1,35 +1,45 @@
 import { useState } from "react";
 import { Input } from "../../components/ui/input";
 import { Button } from "../../components/ui/button";
+import type { BebidaDTO } from "../../api/bebida.api";
 import "../../styles/bebidadashboard.css";
 
 interface AgregarBebidaProps {
   open: boolean;
   onClose: () => void;
-  onSubmit: (bebida: any) => void;
+  onSubmit: (bebida: Partial<BebidaDTO>) => void;
 }
 
 export default function AgregarBebida({ open, onClose, onSubmit }: AgregarBebidaProps) {
   const [nombre, setNombre] = useState("");
   const [alcohol, setAlcohol] = useState(false);
-  const [precio, setPrecio] = useState(0);
-  const [stock, setStock] = useState(0);
+  const [precio, setPrecio] = useState(""); // Cambiado a string para el input
+  const [stock, setStock] = useState("");  // Cambiado a string para el input
 
   const manejarSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Validación básica antes de enviar
+    if (!nombre || precio === "" || stock === "") {
+      alert("Por favor completa todos los campos");
+      return;
+    }
+
     const bebida = {
-      nombre,
+      nombre: nombre.trim(),
       alcohol: alcohol ? 1 : 0,
-      precio: Number(precio),
-      stock: Number(stock)
+      precio: precio, // Ya es un string, coincide con tu DTO y Entity Decimal
+      stock: Number(stock) // Se convierte a número para la DB
     };
 
     onSubmit(bebida);
+    
+    // Limpieza y cierre
     setNombre("");
     setAlcohol(false);
-    setPrecio(0);
-    setStock(0);
+    setPrecio("");
+    setStock("");
+    onClose(); // Es buena práctica cerrar el modal al terminar
   };
 
   if (!open) return null;
@@ -38,30 +48,29 @@ export default function AgregarBebida({ open, onClose, onSubmit }: AgregarBebida
     <div className="modal-overlay">
       <div className="bebida-agregar-card">
         <h2 className="bebida-agregar-title">Nueva Bebida</h2>
-
         <form onSubmit={manejarSubmit} className="bebida-agregar-form">
           <Input
             label="Nombre"
-            type="text"
             value={nombre}
             onChange={(e) => setNombre(e.target.value)}
-            placeholder="Ingrese el nombre de la bebida"
+            placeholder="Ej: Fernet"
           />
 
           <Input
             label="Precio"
             type="number"
+          
             value={precio}
-            onChange={(e) => setPrecio(Number(e.target.value))}
-            placeholder="Ingrese el precio"
+            onChange={(e) => setPrecio(e.target.value)} // Guardamos el string del input
+            placeholder="0.00"
           />
 
           <Input
             label="Stock"
             type="number"
             value={stock}
-            onChange={(e) => setStock(Number(e.target.value))}
-            placeholder="Ingrese la cantidad en stock"
+            onChange={(e) => setStock(e.target.value)} // Guardamos el string del input
+            placeholder="Cantidad disponible"
           />
 
           <label className="bebida-agregar-checkbox">

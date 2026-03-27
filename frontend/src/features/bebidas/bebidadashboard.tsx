@@ -1,34 +1,49 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "../../components/ui/button";
 import Grid from "../../components/ui/grid"; 
 
 import BebidaStats from "./bebidastats";
 import AgregarBebida from "./agregarbebida";
+import { getBebidas, createBebida } from "../../api/bebida.api";
+import type { BebidaDTO } from "../../api/bebida.api";
 import "../../styles/bebidadashboard.css";
 
 export default function BebidaDashboard() {
-  const [bebidas, setBebidas] = useState([
-    { id: 1, nombre: "Coca Cola", alcohol: 0, precio: 1500, stock: 20 },
-    { id: 2, nombre: "Cerveza", alcohol: 1, precio: 2500, stock: 5 },
-    { id: 3, nombre: "Vino Tinto", alcohol: 1, precio: 5000, stock: 0 },
-    { id: 4, nombre: "Jugo Naranja", alcohol: 0, precio: 1200, stock: 15 },
-    { id: 5, nombre: "Agua Mineral", alcohol: 0, precio: 800, stock: 50 },
-    { id: 6, nombre: "Whisky", alcohol: 1, precio: 8000, stock: 3 },
-  ]);
+  const [bebidas, setBebidas] = useState<BebidaDTO[]>([]);
+  const [cargando, setCargando] = useState(true);
 
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
   const [busqueda, setBusqueda] = useState("");
+
+  // Cargar bebidas de la API al montar el componente
+  useEffect(() => {
+    cargarBebidas();
+  }, []);
+
+  const cargarBebidas = async () => {
+    try {
+      setCargando(true);
+      const datos = await getBebidas();
+      setBebidas(datos);
+    } catch (error) {
+      console.error("Error cargando bebidas:", error);
+    } finally {
+      setCargando(false);
+    }
+  };
 
   const bebidasFiltradas = bebidas.filter((bebida) =>
     bebida.nombre.toLowerCase().includes(busqueda.toLowerCase())
   );
 
-  const agregarBebida = (nuevaBebida: any) => {
-    setBebidas((prev) => [
-      ...prev,
-      { ...nuevaBebida, id: prev.length + 1 }
-    ]);
-    setMostrarFormulario(false);
+  const agregarBebida = async (nuevaBebida: Partial<BebidaDTO>) => {
+    try {
+      const bebidaCreada = await createBebida(nuevaBebida);
+      setBebidas((prev) => [...prev, bebidaCreada]);
+      setMostrarFormulario(false);
+    } catch (error) {
+      console.error("Error creando bebida:", error);
+    }
   };
 
   return (
@@ -63,23 +78,28 @@ export default function BebidaDashboard() {
 
       {/* Lista de bebidas usando Grid en lugar de tabla para mejor diseño responsivo */}
       <h3 className="bebida-dashboard-inventory-title">Inventario</h3>
-      <Grid cols={3} gap={4}>
-        {bebidasFiltradas.map((bebida) => (
-          <div 
-            key={bebida.id} 
-            className="bebida-dashboard-card"
-          >
-            <h4 className="bebida-dashboard-card-title">{bebida.nombre}</h4>
-            <div className="bebida-dashboard-card-details">
-              <p className="bebida-dashboard-card-detail">Precio: <strong>${bebida.precio}</strong></p>
-              <p className="bebida-dashboard-card-detail">Alcohol: {bebida.alcohol === 1 ? "Sí" : "No"}</p>
-              <p className="bebida-dashboard-card-detail">Stock: <span className="bebida-dashboard-stock" style={{ color: bebida.stock === 0 ? "#ff4d4d" : "#4dff4d" }}>{bebida.stock} unidades</span></p>
+      
+      {cargando ? (
+        <p className="bebida-dashboard-no-results">Cargando bebidas...</p>
+      ) : (
+        <Grid cols={3} gap={4}>
+          {bebidasFiltradas.map((bebida, index) => (
+            <div 
+              key={bebida.id ?? index} 
+              className="bebida-dashboard-card"
+            >
+              <h4 className="bebida-dashboard-card-title">{bebida.nombre}</h4>
+              <div className="bebida-dashboard-card-details">
+                <p className="bebida-dashboard-card-detail">Precio: <strong>${bebida.precio}</strong></p>
+                <p className="bebida-dashboard-card-detail">Alcohol: {bebida.alcohol === 1 ? "Sí" : "No"}</p>
+                <p className="bebida-dashboard-card-detail">Stock: <span className="bebida-dashboard-stock" style={{ color: bebida.stock === 0 ? "#ff4d4d" : "#4dff4d" }}>{bebida.stock} unidades</span></p>
+              </div>
             </div>
-          </div>
-        ))}
-      </Grid>
+          ))}
+        </Grid>
+      )}
 
-      {bebidasFiltradas.length === 0 && (
+      {!cargando && bebidasFiltradas.length === 0 && (
         <p className="bebida-dashboard-no-results">No se encontraron bebidas.</p>
       )}
     </div>

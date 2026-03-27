@@ -1,6 +1,6 @@
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
-@Entity('bebidas')
+@Entity('bebida')
 export class Bebida {
   @PrimaryGeneratedColumn()
   id: number;
@@ -13,6 +13,9 @@ export class Bebida {
 
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   precio: string;
+
+  @Column({ type: 'int', default: 0 })
+  stock: number;
 
   @CreateDateColumn({ type: 'datetime' })
   creacion: Date;

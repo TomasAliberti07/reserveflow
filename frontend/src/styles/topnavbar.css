@@ -1,5 +1,7 @@
 .top-navbar {
   height: 75px; /* más alto */
+  min-height: 75px;
+  flex: 0 0 auto;
   display: flex;
   align-items: center;
   justify-content: space-between;

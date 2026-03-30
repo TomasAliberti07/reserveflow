@@ -8,7 +8,7 @@ export default function BebidasStats({ bebidas }: Props) {
   const stockBajo = bebidas.filter(b => b.stock > 0 && b.stock <= 5).length;
 
   return (
-    <div style={{ display: "flex", gap: "1rem", marginBottom: "1rem" }}>
+    <div className="bebida-stats">
       <div className="card">
         <h3>Total</h3>
         <p>{total}</p>

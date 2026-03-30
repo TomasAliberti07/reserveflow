@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { FaEdit, FaTrash } from "react-icons/fa";
 import { Button } from "../../components/ui/button";
 import Grid from "../../components/ui/grid"; 
 
@@ -88,7 +89,17 @@ export default function BebidaDashboard() {
               key={bebida.id ?? index} 
               className="bebida-dashboard-card"
             >
-              <h4 className="bebida-dashboard-card-title">{bebida.nombre}</h4>
+              <div className="bebida-dashboard-card-header">
+                <h4 className="bebida-dashboard-card-title">{bebida.nombre}</h4>
+                <div className="bebida-dashboard-card-actions">
+                  <button type="button" className="bebida-dashboard-card-action" aria-label="Editar bebida">
+                    <FaEdit />
+                  </button>
+                  <button type="button" className="bebida-dashboard-card-action" aria-label="Eliminar bebida">
+                    <FaTrash />
+                  </button>
+                </div>
+              </div>
               <div className="bebida-dashboard-card-details">
                 <p className="bebida-dashboard-card-detail">Precio: <strong>${bebida.precio}</strong></p>
                 <p className="bebida-dashboard-card-detail">Alcohol: {bebida.alcohol === 1 ? "Sí" : "No"}</p>

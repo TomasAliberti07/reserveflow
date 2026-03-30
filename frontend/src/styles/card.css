@@ -7,7 +7,7 @@
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
   transition: transform 0.25s ease, box-shadow 0.25s ease;
 
-  aspect-ratio: 1 / 1; /* Mantiene forma cuadrada */
+  min-height: 170px;
 
   display: flex;
   flex-direction: column;

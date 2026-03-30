@@ -1,10 +1,16 @@
 .dashboard-layout {
-  height: 100vh;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
+  background: linear-gradient(
+    180deg,
+    rgba(15, 23, 42, 0.95),
+    rgba(0, 0, 0, 0.95)
+  );
 }
 
 .dashboard-content {
   flex: 1;
   padding: 30px;
+  background: transparent;
 }

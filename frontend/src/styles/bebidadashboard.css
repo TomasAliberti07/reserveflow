@@ -2,6 +2,8 @@
 
 .bebida-dashboard {
   padding: 2rem;
+  min-height: calc(100vh - 95px);
+  background: transparent;
 }
 
 .bebida-dashboard-header {
@@ -51,11 +53,49 @@
   padding: 1rem;
   border-radius: 0.5rem;
   border: 1px solid #444;
+  position: relative;
+}
+
+.bebida-dashboard-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
 }
 
 .bebida-dashboard-card-title {
-  margin: 0 0 0.5rem 0;
+  margin: 0;
   color: #fff;
+  font-size: 1.05rem;
+}
+
+.bebida-dashboard-card-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.bebida-dashboard-card-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  background: rgba(255, 255, 255, 0.04);
+  color: #e2e8f0;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.bebida-dashboard-card-action:hover {
+  background: rgba(148, 163, 184, 0.18);
+  transform: translateY(-1px);
+}
+
+.bebida-dashboard-card-action svg {
+  width: 16px;
+  height: 16px;
 }
 
 .bebida-dashboard-card-details {
@@ -65,6 +105,18 @@
 
 .bebida-dashboard-card-detail {
   margin: 0.2rem 0;
+}
+
+.bebida-stats {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.bebida-stats .card {
+  flex: 1;
+  min-width: 200px;
 }
 
 .bebida-dashboard-no-results {

@@ -1,3 +1,9 @@
+import DashboardLayout from "../layouts/dashboard";
+
 export default function Salons() {
-  return <h2>Salons</h2>;
+  return (
+    <DashboardLayout>
+      <h2>Salons</h2>
+    </DashboardLayout>
+  );
 }

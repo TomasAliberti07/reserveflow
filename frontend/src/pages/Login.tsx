@@ -1,11 +1,23 @@
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
+import { useNavigate } from "react-router-dom";
 import { Input } from "../components/ui/input";
 import { Button } from "../components/ui/button";
 import CrearCuentaModal from "../features/auth/Crearcuentamodal";
 import "../styles/login.card.css";
 
 export default function Login() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [openCrearCuenta, setOpenCrearCuenta] = useState(false);
+  const navigate = useNavigate();
+
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (email.trim() && password.trim()) {
+      navigate("/dashboard");
+    }
+  };
 
   return (
     <div className="login-container">
@@ -14,10 +26,22 @@ export default function Login() {
       <div className="login-card">
         <h2 className="login-form-title">Inicio de sesión</h2>
 
-        <Input label="Email" type="email" />
-        <Input label="Contraseña" type="password" />
+        <form onSubmit={handleSubmit}>
+          <Input
+            label="Email"
+            type="email"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+          />
+          <Input
+            label="Contraseña"
+            type="password"
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+          />
 
-        <Button type="submit">Ingresar</Button>
+          <Button type="submit">Ingresar</Button>
+        </form>
 
         <button
           className="link-button"

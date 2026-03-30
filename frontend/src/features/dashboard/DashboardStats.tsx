@@ -3,7 +3,7 @@ import Grid from "../../components/ui/grid";
 
 const DashboardStats: React.FC = () => {
   return (
-    <Grid>
+    <Grid cols={4} gap={4}>
       <Card title="Salones">
         <p className="card-content">Proximamente</p>
       </Card>

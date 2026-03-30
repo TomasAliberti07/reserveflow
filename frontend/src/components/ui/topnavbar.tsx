@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import {
   FaHome,
   FaCalendarAlt,
@@ -10,28 +11,26 @@ import "../../styles/topnavbar.css";
 export default function TopNavbar() {
   return (
     <nav className="top-navbar">
-      <div className="navbar-left">
-        ReserveFlow
-      </div>
+      <div className="navbar-left">ReserveFlow</div>
 
       <div className="navbar-right">
-        <div className="navbar-icon" data-label="Inicio">
+        <Link to="/dashboard" className="navbar-icon" aria-label="Inicio">
           <FaHome />
-        </div>
+        </Link>
 
-        <div className="navbar-icon" data-label="Eventos">
+        <Link to="/events" className="navbar-icon" aria-label="Eventos">
           <FaCalendarAlt />
-        </div>
+        </Link>
 
-        <div className="navbar-icon" data-label="Salones">
+        <Link to="/bebidas" className="navbar-icon" aria-label="Bebidas">
           <FaCocktail />
-        </div>
+        </Link>
 
-        <div className="navbar-icon" data-label="Estadísticas">
+        <Link to="/salons" className="navbar-icon" aria-label="Salones">
           <FaChartBar />
-        </div>
+        </Link>
 
-        <div className="navbar-icon" data-label="Configuración">
+        <div className="navbar-icon" aria-label="Configuración">
           <FaCog />
         </div>
       </div>

@@ -28,8 +28,8 @@ export default function AgregarBebida({ open, onClose, onSubmit }: AgregarBebida
     const bebida = {
       nombre: nombre.trim(),
       alcohol: alcohol ? 1 : 0,
-      precio: precio, // Ya es un string, coincide con tu DTO y Entity Decimal
-      stock: Number(stock) // Se convierte a número para la DB
+      precio: precio, 
+      stock: Number(stock) 
     };
 
     onSubmit(bebida);
@@ -39,7 +39,7 @@ export default function AgregarBebida({ open, onClose, onSubmit }: AgregarBebida
     setAlcohol(false);
     setPrecio("");
     setStock("");
-    onClose(); // Es buena práctica cerrar el modal al terminar
+    onClose(); 
   };
 
   if (!open) return null;
@@ -61,7 +61,7 @@ export default function AgregarBebida({ open, onClose, onSubmit }: AgregarBebida
             type="number"
           
             value={precio}
-            onChange={(e) => setPrecio(e.target.value)} // Guardamos el string del input
+            onChange={(e) => setPrecio(e.target.value)} 
             placeholder="0.00"
           />
 
@@ -69,7 +69,7 @@ export default function AgregarBebida({ open, onClose, onSubmit }: AgregarBebida
             label="Stock"
             type="number"
             value={stock}
-            onChange={(e) => setStock(e.target.value)} // Guardamos el string del input
+            onChange={(e) => setStock(e.target.value)} 
             placeholder="Cantidad disponible"
           />
 

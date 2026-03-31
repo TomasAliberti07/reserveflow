@@ -12,13 +12,13 @@ export class BebidaService {
     private bebidaRepository: Repository<Bebida>,
   ) {}
 
-  // Usamos async para esperar el impacto real en la DB
+  // Use async para esperar el impacto real en la DB
   async create(createBebidaDto: CreateBebidaDto): Promise<Bebida> {
     // console.log('Recibiendo en Service:', createBebidaDto);
     
     const nuevaBebida = this.bebidaRepository.create(createBebidaDto);
     
-    // El await asegura que el registro se guarde antes de continuar
+    // Use await para asegurar que el registro se guarde antes de continuar
     return await this.bebidaRepository.save(nuevaBebida);
   }
 
@@ -32,15 +32,14 @@ export class BebidaService {
     return bebida;
   }
 
-  // Cambiamos .update() por .preload() + .save() para que devuelva el objeto real
+
  async update(id: number, updateBebidaDto: UpdateBebidaDto): Promise<Bebida> {
-    // Usamos desestructuración para separar el 'id' que viene en el cuerpo
-    // del resto de los datos (nombre, precio, stock, etc.)
+   
     const { id: _, ...datosAActualizar } = updateBebidaDto;
 
     const bebida = await this.bebidaRepository.preload({
-      id: id,                // El ID que viene del @Param (la URL)
-      ...datosAActualizar,   // El resto de los campos opcionales
+      id: id,                
+      ...datosAActualizar,   
     });
 
     if (!bebida) {

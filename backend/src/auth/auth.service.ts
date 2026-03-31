@@ -40,10 +40,10 @@ export class AuthService {
       estado: true,
     });
     
-    //  Guardar en DB
+   
     await this.userRepository.save(user);
     
-    //  Respuesta (NUNCA devolver password)
+
     return {
       message: 'Usuario creado correctamente',
       user: {

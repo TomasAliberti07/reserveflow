@@ -21,7 +21,7 @@ export default function BebidaForm({ onSubmit, bebidaInicial }: Props) {
 
     const bebida = {
       nombre,
-      alcohol: alcohol ? 1 : 0, // importante para MySQL tinyint(1)
+      alcohol: alcohol ? 1 : 0, 
       precio: Number(precio)
     };
 

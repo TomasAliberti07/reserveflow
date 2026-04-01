@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "../../components/ui/input";
 import { Button } from "../../components/ui/button";
 import type { BebidaDTO } from "../../api/bebida.api";
@@ -7,19 +7,33 @@ import "../../styles/bebidadashboard.css";
 interface AgregarBebidaProps {
   open: boolean;
   onClose: () => void;
-  onSubmit: (bebida: Partial<BebidaDTO>) => void;
+  onSubmit: (bebida: Partial<BebidaDTO>) => Promise<void>;
+  bebidaInicial?: Partial<BebidaDTO>;
 }
 
-export default function AgregarBebida({ open, onClose, onSubmit }: AgregarBebidaProps) {
+export default function AgregarBebida({ open, onClose, onSubmit, bebidaInicial }: AgregarBebidaProps) {
   const [nombre, setNombre] = useState("");
   const [alcohol, setAlcohol] = useState(false);
-  const [precio, setPrecio] = useState(""); // Cambiado a string para el input
-  const [stock, setStock] = useState("");  // Cambiado a string para el input
+  const [precio, setPrecio] = useState("");
+  const [stock, setStock] = useState("");
 
-  const manejarSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    if (open) {
+      setNombre(bebidaInicial?.nombre ?? "");
+      setAlcohol(bebidaInicial?.alcohol === 1);
+      setPrecio(bebidaInicial?.precio ?? "");
+      setStock(bebidaInicial?.stock != null ? String(bebidaInicial.stock) : "");
+    } else {
+      setNombre("");
+      setAlcohol(false);
+      setPrecio("");
+      setStock("");
+    }
+  }, [open, bebidaInicial]);
+
+  const manejarSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validación básica antes de enviar
     if (!nombre || precio === "" || stock === "") {
       alert("Por favor completa todos los campos");
       return;
@@ -28,18 +42,11 @@ export default function AgregarBebida({ open, onClose, onSubmit }: AgregarBebida
     const bebida = {
       nombre: nombre.trim(),
       alcohol: alcohol ? 1 : 0,
-      precio: precio, 
-      stock: Number(stock) 
+      precio,
+      stock: Number(stock),
     };
 
-    onSubmit(bebida);
-    
-    // Limpieza y cierre
-    setNombre("");
-    setAlcohol(false);
-    setPrecio("");
-    setStock("");
-    onClose(); 
+    await onSubmit(bebida);
   };
 
   if (!open) return null;
@@ -47,7 +54,7 @@ export default function AgregarBebida({ open, onClose, onSubmit }: AgregarBebida
   return (
     <div className="modal-overlay">
       <div className="bebida-agregar-card">
-        <h2 className="bebida-agregar-title">Nueva Bebida</h2>
+        <h2 className="bebida-agregar-title">{bebidaInicial ? "Editar Bebida" : "Nueva Bebida"}</h2>
         <form onSubmit={manejarSubmit} className="bebida-agregar-form">
           <Input
             label="Nombre"

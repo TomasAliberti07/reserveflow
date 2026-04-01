@@ -34,12 +34,9 @@ export class BebidaService {
 
 
  async update(id: number, updateBebidaDto: UpdateBebidaDto): Promise<Bebida> {
-   
-    const { id: _, ...datosAActualizar } = updateBebidaDto;
-
     const bebida = await this.bebidaRepository.preload({
       id: id,                
-      ...datosAActualizar,   
+      ...updateBebidaDto,   
     });
 
     if (!bebida) {

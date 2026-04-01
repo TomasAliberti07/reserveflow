@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import { FaEdit, FaTrash } from "react-icons/fa";
 import { Button } from "../../components/ui/button";
-import Grid from "../../components/ui/grid"; 
+import Grid from "../../components/ui/grid";
 
 import BebidaStats from "./bebidastats";
 import AgregarBebida from "./agregarbebida";
-import { getBebidas, createBebida } from "../../api/bebida.api";
+import Popup from "../../components/ui/popup";
+import { getBebidas, createBebida, updateBebida, deleteBebida } from "../../api/bebida.api";
 import type { BebidaDTO } from "../../api/bebida.api";
 import "../../styles/bebidadashboard.css";
 
@@ -14,7 +15,13 @@ export default function BebidaDashboard() {
   const [cargando, setCargando] = useState(true);
 
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
+  const [bebidaParaEditar, setBebidaParaEditar] = useState<BebidaDTO | null>(null);
   const [busqueda, setBusqueda] = useState("");
+
+  const [popupOpen, setPopupOpen] = useState(false);
+  const [popupTitle, setPopupTitle] = useState<string | undefined>(undefined);
+  const [popupMessage, setPopupMessage] = useState("");
+  const [popupType, setPopupType] = useState<"success" | "error" | "info">("info");
 
   // Cargar bebidas de la API al montar el componente
   useEffect(() => {
@@ -37,13 +44,57 @@ export default function BebidaDashboard() {
     bebida.nombre.toLowerCase().includes(busqueda.toLowerCase())
   );
 
-  const agregarBebida = async (nuevaBebida: Partial<BebidaDTO>) => {
+  const abrirFormularioNuevo = () => {
+    setBebidaParaEditar(null);
+    setMostrarFormulario(true);
+  };
+
+  const abrirFormularioEdicion = (bebida: BebidaDTO) => {
+    setBebidaParaEditar(bebida);
+    setMostrarFormulario(true);
+  };
+
+  const cerrarFormulario = () => {
+    setMostrarFormulario(false);
+    setBebidaParaEditar(null);
+  };
+
+  const mostrarPopup = (title: string, message: string, type: "success" | "error" | "info") => {
+    setPopupTitle(title);
+    setPopupMessage(message);
+    setPopupType(type);
+    setPopupOpen(true);
+  };
+
+  const handleGuardarBebida = async (bebidaData: Partial<BebidaDTO>) => {
     try {
-      const bebidaCreada = await createBebida(nuevaBebida);
-      setBebidas((prev) => [...prev, bebidaCreada]);
-      setMostrarFormulario(false);
+      if (bebidaParaEditar?.id != null) {
+        const bebidaActualizada = await updateBebida(bebidaParaEditar.id, bebidaData);
+        setBebidas((prev) => prev.map((item) => (item.id === bebidaParaEditar.id ? bebidaActualizada : item)));
+        cerrarFormulario();
+        mostrarPopup("Bebida actualizada", "Los datos de la bebida se guardaron correctamente.", "success");
+      } else {
+        const bebidaCreada = await createBebida(bebidaData);
+        setBebidas((prev) => [...prev, bebidaCreada]);
+        cerrarFormulario();
+        mostrarPopup("Bebida agregada", "La bebida se guardó correctamente.", "success");
+      }
     } catch (error) {
-      console.error("Error creando bebida:", error);
+      console.error("Error guardando bebida:", error);
+      mostrarPopup("Error", "No se pudo guardar la bebida. Intenta nuevamente.", "error");
+    }
+  };
+
+  const handleEliminarBebida = async (id?: number) => {
+    if (id == null) return;
+
+    try {
+      await deleteBebida(id);
+      setBebidas((prev) => prev.filter((bebida) => bebida.id !== id));
+      mostrarPopup("Bebida eliminada", "La bebida se eliminó correctamente.", "success");
+    } catch (error) {
+      console.error("Error eliminando bebida:", error);
+      mostrarPopup("Error", "No se pudo eliminar la bebida. Intenta nuevamente.", "error");
     }
   };
 
@@ -51,7 +102,7 @@ export default function BebidaDashboard() {
     <div className="bebida-dashboard">
       <div className="bebida-dashboard-header">
         <h1 className="bebida-dashboard-title">Gestión de Bebidas</h1>
-        <Button onClick={() => setMostrarFormulario(true)} className="bebida-dashboard-button">
+        <Button onClick={abrirFormularioNuevo} className="bebida-dashboard-button">
           + Agregar
         </Button>
       </div>
@@ -62,7 +113,20 @@ export default function BebidaDashboard() {
         </div>
       </Grid>
 
-      <AgregarBebida open={mostrarFormulario} onClose={() => setMostrarFormulario(false)} onSubmit={agregarBebida} />
+      <AgregarBebida
+        open={mostrarFormulario}
+        onClose={cerrarFormulario}
+        onSubmit={handleGuardarBebida}
+        bebidaInicial={bebidaParaEditar ?? undefined}
+      />
+
+      <Popup
+        open={popupOpen}
+        title={popupTitle}
+        message={popupMessage}
+        type={popupType}
+        onClose={() => setPopupOpen(false)}
+      />
 
       <hr className="bebida-dashboard-hr" />
       
@@ -92,10 +156,20 @@ export default function BebidaDashboard() {
               <div className="bebida-dashboard-card-header">
                 <h4 className="bebida-dashboard-card-title">{bebida.nombre}</h4>
                 <div className="bebida-dashboard-card-actions">
-                  <button type="button" className="bebida-dashboard-card-action" aria-label="Editar bebida">
+                  <button
+                    type="button"
+                    className="bebida-dashboard-card-action"
+                    aria-label="Editar bebida"
+                    onClick={() => abrirFormularioEdicion(bebida)}
+                  >
                     <FaEdit />
                   </button>
-                  <button type="button" className="bebida-dashboard-card-action" aria-label="Eliminar bebida">
+                  <button
+                    type="button"
+                    className="bebida-dashboard-card-action"
+                    aria-label="Eliminar bebida"
+                    onClick={() => handleEliminarBebida(bebida.id)}
+                  >
                     <FaTrash />
                   </button>
                 </div>

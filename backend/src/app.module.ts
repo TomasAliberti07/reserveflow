@@ -8,6 +8,7 @@ import { SalonsModule } from './salons/salons.module';
 import { EventsModule } from './events/events.module';
 import { AuthModule } from './auth/auth.module';
 import { BebidaModule } from './bebida/bebida.module';
+import { MenusModule } from './menus/menus.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { BebidaModule } from './bebida/bebida.module';
     EventsModule,
     AuthModule,
     BebidaModule,
+    MenusModule,
   ],
   controllers: [AppController],
   providers: [AppService],

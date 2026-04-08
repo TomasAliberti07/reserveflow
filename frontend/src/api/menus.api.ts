@@ -1,6 +1,8 @@
 export interface MenuDTO {
   id?: number;
-  nombre: string;
+  entrada: string;
+  plato_principal: string;
+  postre: string;
   descripcion: string;
   precio: number;
   disponible: number;

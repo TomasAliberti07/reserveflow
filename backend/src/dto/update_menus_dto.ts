@@ -1,17 +1,25 @@
-import { IsString, IsInt, IsOptional } from 'class-validator';
+import { IsString, IsInt, IsOptional, IsNumber } from 'class-validator';
 
 export class UpdateMenusDto {
   @IsOptional()
   @IsString()
-  nombre?: string;
+  entrada?: string;
+
+  @IsOptional()
+  @IsString()
+  plato_principal?: string;
+
+  @IsOptional()
+  @IsString()
+  postre?: string;
 
   @IsOptional()
   @IsString()
   descripcion?: string;
 
   @IsOptional()
-  @IsString()
-  precio?: string;
+  @IsNumber()
+  precio?: number;
 
   @IsOptional()
   @IsInt()

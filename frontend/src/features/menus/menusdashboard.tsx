@@ -41,7 +41,9 @@ export default function MenuDashboard() {
   };
 
   const menusFiltrados = menus.filter((menu) =>
-    menu.nombre.toLowerCase().includes(busqueda.toLowerCase())
+    menu.entrada.toLowerCase().includes(busqueda.toLowerCase()) ||
+    menu.plato_principal.toLowerCase().includes(busqueda.toLowerCase()) ||
+    menu.postre.toLowerCase().includes(busqueda.toLowerCase())
   );
 
   const abrirFormularioNuevo = () => {
@@ -154,7 +156,7 @@ export default function MenuDashboard() {
               className="menu-dashboard-card"
             >
               <div className="menu-dashboard-card-header">
-                <h4 className="menu-dashboard-card-title">{menu.nombre}</h4>
+                <h4 className="menu-dashboard-card-title">{menu.entrada} - {menu.plato_principal} - {menu.postre}</h4>
                 <div className="menu-dashboard-card-actions">
                   <button
                     type="button"

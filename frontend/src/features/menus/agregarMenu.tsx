@@ -12,19 +12,25 @@ interface AgregarMenuProps {
 }
 
 export default function AgregarMenu({ open, onClose, onSubmit, menuInicial }: AgregarMenuProps) {
-  const [nombre, setNombre] = useState("");
+  const [entrada, setEntrada] = useState("");
+  const [platoPrincipal, setPlatoPrincipal] = useState("");
+  const [postre, setPostre] = useState("");
   const [descripcion, setDescripcion] = useState("");
   const [disponible, setDisponible] = useState(true);
   const [precio, setPrecio] = useState("");
 
   useEffect(() => {
     if (open) {
-      setNombre(menuInicial?.nombre ?? "");
+      setEntrada(menuInicial?.entrada ?? "");
+      setPlatoPrincipal(menuInicial?.plato_principal ?? "");
+      setPostre(menuInicial?.postre ?? "");
       setDescripcion(menuInicial?.descripcion ?? "");
       setDisponible(menuInicial?.disponible === 1);
       setPrecio(menuInicial?.precio ? String(menuInicial.precio) : "");
     } else {
-      setNombre("");
+      setEntrada("");
+      setPlatoPrincipal("");
+      setPostre("");
       setDescripcion("");
       setDisponible(true);
       setPrecio("");
@@ -34,13 +40,15 @@ export default function AgregarMenu({ open, onClose, onSubmit, menuInicial }: Ag
   const manejarSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!nombre || !descripcion || precio === "") {
+    if (!entrada || !platoPrincipal || !postre || !descripcion || precio === "") {
       alert("Por favor completa todos los campos");
       return;
     }
 
     const menu = {
-      nombre: nombre.trim(),
+      entrada: entrada.trim(),
+      plato_principal: platoPrincipal.trim(),
+      postre: postre.trim(),
       descripcion: descripcion.trim(),
       disponible: disponible ? 1 : 0,
       precio: Number(precio),
@@ -57,10 +65,24 @@ export default function AgregarMenu({ open, onClose, onSubmit, menuInicial }: Ag
         <h2>{menuInicial ? "Editar Menú" : "Nuevo Menú"}</h2>
         <form onSubmit={manejarSubmit} className="menu-form">
           <Input
-            label="Nombre"
+            label="Entrada"
             type="text"
-            value={nombre}
-            onChange={(e) => setNombre(e.target.value)}
+            value={entrada}
+            onChange={(e) => setEntrada(e.target.value)}
+          />
+
+          <Input
+            label="Plato Principal"
+            type="text"
+            value={platoPrincipal}
+            onChange={(e) => setPlatoPrincipal(e.target.value)}
+          />
+
+          <Input
+            label="Postre"
+            type="text"
+            value={postre}
+            onChange={(e) => setPostre(e.target.value)}
           />
 
           <div className="form-group">
@@ -91,8 +113,8 @@ export default function AgregarMenu({ open, onClose, onSubmit, menuInicial }: Ag
           </label>
 
           <div className="menu-form-actions">
-            <button type="button" onClick={onClose} className="menu-cancel-button">Cancelar</button>
-            <button type="submit" className="menu-submit-button">Guardar</button>
+            <Button type="button" onClick={onClose} className="menu-cancel-button">Cancelar</Button>
+            <Button type="submit" className="menu-submit-button">Guardar</Button>
           </div>
         </form>
       </div>

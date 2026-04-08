@@ -9,29 +9,29 @@ import {
 @Entity('users')
 export class User {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @Column({ length: 100 })
-  nombre: string;
+  nombre!: string;
 
   @Column({ length: 100 })
-  apellido: string;
+  apellido!: string;
 
   @Column({ length: 150, unique: true })
-  email: string;
+  email!: string;
 
   @Column({ length: 20 })
-  telefono: string;
+  telefono!: string;
 
   @Column()
-  password_hash: string;
+  password_hash!: string;
 
   @Column({ type: 'boolean', default: true })
-  estado: boolean;
+  estado!: boolean;
 
   @CreateDateColumn({ name: 'created_at' })
-  createdAt: Date;
+  createdAt!: Date;
 
   @UpdateDateColumn({ name: 'updated_at' })
-  updatedAt: Date;
+  updatedAt!: Date;
 }

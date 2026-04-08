@@ -1,7 +1,9 @@
 -- Create menus table
 CREATE TABLE IF NOT EXISTS `menus` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `nombre` varchar(150) NOT NULL,
+  `entrada` varchar(150) NOT NULL,
+  `plato_principal` varchar(150) NOT NULL,
+  `postre` varchar(150) NOT NULL,
   `descripcion` varchar(500) NOT NULL,
   `precio` decimal(10,2) NOT NULL,
   `disponible` tinyint NOT NULL DEFAULT '1',

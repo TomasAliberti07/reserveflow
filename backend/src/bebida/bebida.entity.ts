@@ -3,23 +3,23 @@ import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateCol
 @Entity('bebida')
 export class Bebida {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @Column({ type: 'varchar', length: 100 })
-  nombre: string;
+  nombre!: string;
 
   @Column({ type: 'tinyint', width: 1 })
-  alcohol: number;
+  alcohol!: number;
 
   @Column({ type: 'decimal', precision: 10, scale: 2 })
-  precio: string;
+  precio!: string;
 
   @Column({ type: 'int', default: 0 })
-  stock: number;
+  stock!: number;
 
   @CreateDateColumn({ type: 'datetime' })
-  creacion: Date;
+  creacion!: Date;
 
   @UpdateDateColumn({ type: 'datetime' })
-  actualizacion: Date;
+  actualizacion!: Date;
 }

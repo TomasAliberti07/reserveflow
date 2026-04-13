@@ -1,19 +1,19 @@
 import { useState, useEffect } from "react";
 import { Input } from "../../components/ui/input";
 import { Button } from "../../components/ui/button";
-import type { MenuDTO } from "../../api/menus.api";
+import type { MenusDTO } from "../../api/menus.api";
 import "../../styles/menusdashboard.css";
 
 interface AgregarMenuProps {
   open: boolean;
   onClose: () => void;
-  onSubmit: (menu: Partial<MenuDTO>) => Promise<void>;
-  menuInicial?: Partial<MenuDTO>;
+  onSubmit: (menu: Partial<MenusDTO>) => Promise<void>;
+  menuInicial?: Partial<MenusDTO>;
 }
 
 export default function AgregarMenu({ open, onClose, onSubmit, menuInicial }: AgregarMenuProps) {
   const [entrada, setEntrada] = useState("");
-  const [platoPrincipal, setPlatoPrincipal] = useState("");
+  const [platprincipal, setPlatPrincipal] = useState("");
   const [postre, setPostre] = useState("");
   const [descripcion, setDescripcion] = useState("");
   const [disponible, setDisponible] = useState(true);
@@ -21,15 +21,15 @@ export default function AgregarMenu({ open, onClose, onSubmit, menuInicial }: Ag
 
   useEffect(() => {
     if (open) {
-      setEntrada(menuInicial?.entrada ?? "");
-      setPlatoPrincipal(menuInicial?.plato_principal ?? "");
+      setEntrada(menuInicial?.nombre ?? "");
+      setPlatPrincipal(menuInicial?.plaprincipal ?? "");
       setPostre(menuInicial?.postre ?? "");
       setDescripcion(menuInicial?.descripcion ?? "");
       setDisponible(menuInicial?.disponible === 1);
       setPrecio(menuInicial?.precio ? String(menuInicial.precio) : "");
     } else {
       setEntrada("");
-      setPlatoPrincipal("");
+      setPlatPrincipal("");
       setPostre("");
       setDescripcion("");
       setDisponible(true);
@@ -40,18 +40,19 @@ export default function AgregarMenu({ open, onClose, onSubmit, menuInicial }: Ag
   const manejarSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!entrada || !platoPrincipal || !postre || !descripcion || precio === "") {
+    if (!entrada || !platprincipal || !postre || !descripcion || precio === "") {
       alert("Por favor completa todos los campos");
       return;
     }
 
+    // Único cambio: Mapear los nombres de los estados a los que espera el DTO/Entity
     const menu = {
-      entrada: entrada.trim(),
-      plato_principal: platoPrincipal.trim(),
+      nombre: entrada.trim(),           // 'entrada' viaja como 'nombre'
+      plaprincipal: platprincipal.trim(), // 'platprincipal' viaja como 'plaprincipal'
       postre: postre.trim(),
       descripcion: descripcion.trim(),
       disponible: disponible ? 1 : 0,
-      precio: Number(precio),
+      precio: precio,
     };
 
     await onSubmit(menu);
@@ -74,8 +75,8 @@ export default function AgregarMenu({ open, onClose, onSubmit, menuInicial }: Ag
           <Input
             label="Plato Principal"
             type="text"
-            value={platoPrincipal}
-            onChange={(e) => setPlatoPrincipal(e.target.value)}
+            value={platprincipal}
+            onChange={(e) => setPlatPrincipal(e.target.value)}
           />
 
           <Input

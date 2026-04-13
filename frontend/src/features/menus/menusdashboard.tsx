@@ -7,15 +7,15 @@ import MenusStats from "./menustats";
 import AgregarMenu from "./agregarMenu";
 import Popup from "../../components/ui/popup";
 import { getMenus, createMenu, updateMenu, deleteMenu } from "../../api/menus.api";
-import type { MenuDTO } from "../../api/menus.api";
+import type { MenusDTO } from "../../api/menus.api";
 import "../../styles/menusdashboard.css";
 
 export default function MenuDashboard() {
-  const [menus, setMenus] = useState<MenuDTO[]>([]);
+  const [menus, setMenus] = useState<MenusDTO[]>([]);
   const [cargando, setCargando] = useState(true);
 
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
-  const [menuParaEditar, setMenuParaEditar] = useState<MenuDTO | null>(null);
+  const [menuParaEditar, setMenuParaEditar] = useState<MenusDTO | null>(null);
   const [busqueda, setBusqueda] = useState("");
 
   const [popupOpen, setPopupOpen] = useState(false);
@@ -41,9 +41,9 @@ export default function MenuDashboard() {
   };
 
   const menusFiltrados = menus.filter((menu) =>
-    menu.entrada.toLowerCase().includes(busqueda.toLowerCase()) ||
-    menu.plato_principal.toLowerCase().includes(busqueda.toLowerCase()) ||
-    menu.postre.toLowerCase().includes(busqueda.toLowerCase())
+    menu.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
+    (menu.plaprincipal ?? "").toLowerCase().includes(busqueda.toLowerCase()) ||
+    (menu.postre ?? "").toLowerCase().includes(busqueda.toLowerCase())
   );
 
   const abrirFormularioNuevo = () => {
@@ -51,7 +51,7 @@ export default function MenuDashboard() {
     setMostrarFormulario(true);
   };
 
-  const abrirFormularioEdicion = (menu: MenuDTO) => {
+  const abrirFormularioEdicion = (menu: MenusDTO) => {
     setMenuParaEditar(menu);
     setMostrarFormulario(true);
   };
@@ -68,7 +68,7 @@ export default function MenuDashboard() {
     setPopupOpen(true);
   };
 
-  const handleGuardarMenu = async (menuData: Partial<MenuDTO>) => {
+  const handleGuardarMenu = async (menuData: Partial<MenusDTO>) => {
     try {
       if (menuParaEditar?.id != null) {
         const menuActualizado = await updateMenu(menuParaEditar.id, menuData);
@@ -156,7 +156,7 @@ export default function MenuDashboard() {
               className="menu-dashboard-card"
             >
               <div className="menu-dashboard-card-header">
-                <h4 className="menu-dashboard-card-title">{menu.entrada} - {menu.plato_principal} - {menu.postre}</h4>
+                <h4 className="menu-dashboard-card-title">{menu.nombre} - {menu.plaprincipal} - {menu.postre}</h4>
                 <div className="menu-dashboard-card-actions">
                   <button
                     type="button"

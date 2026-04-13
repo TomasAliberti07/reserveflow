@@ -1,4 +1,4 @@
-import { IsString, IsNumber, IsNotEmpty, IsInt, Min } from 'class-validator';
+import { IsString, IsNumber, IsNotEmpty, IsInt, IsOptional } from 'class-validator';
 
 export class CreateMenusDto {
   @IsString()
@@ -6,12 +6,22 @@ export class CreateMenusDto {
   nombre!: string;
 
   @IsString()
-  @IsNotEmpty({ message: 'La descripción es obligatoria' })
-  descripcion!: string;
+  @IsOptional()
+  descripcion?: string | null;
 
   @IsString()
+  @IsOptional() // <-- IMPORTANTE: Agrégalo para que no falle si viene vacío
+  plaprincipal?: string | null;
+
+  @IsString()
+  @IsOptional() // <-- IMPORTANTE: Agrégalo también aquí
+  postre?: string | null;
+
+  @IsString()
+  @IsNotEmpty()
   precio!: string;
 
-  @IsInt()
+  @IsInt() // Si el frontend envía un número, esto está bien. 
+  @IsOptional() // Opcional por si el default lo pone la DB
   disponible!: number;
 }

@@ -8,8 +8,14 @@ export class Menus {
   @Column({ type: 'varchar', length: 150 })
   nombre!: string;
 
-  @Column({ type: 'varchar', length: 500 })
-  descripcion!: string;
+  @Column({ type: 'varchar', length: 500, nullable: true })
+  descripcion!: string | null;
+
+  @Column({ type: 'varchar', length: 500, nullable: true })
+  plaprincipal!: string | null;
+
+  @Column({ type: 'varchar', length: 500, nullable: true })
+  postre!: string | null;
 
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   precio!: string;
@@ -17,9 +23,15 @@ export class Menus {
   @Column({ type: 'tinyint', width: 1 })
   disponible!: number;
 
-  @CreateDateColumn({ type: 'datetime' })
-  createdAt!: Date;
+@CreateDateColumn({ 
+    name: 'creacion', 
+    type: 'datetime' 
+  })
+  createdAt!: Date; 
 
-  @UpdateDateColumn({ type: 'datetime' })
-  updatedAt!: Date;
+  @UpdateDateColumn({ 
+    name: 'actualizacion', 
+    type: 'datetime' 
+  })
+  updatedAt!: Date; 
 }

@@ -1,77 +1,36 @@
-export interface MenuDTO {
+import axios from "axios";
+
+const API_URL = "http://localhost:3000";
+
+export interface MenusDTO {
   id?: number;
-  entrada: string;
-  plato_principal: string;
-  postre: string;
-  descripcion: string;
-  precio: number;
+  nombre: string;
+  plaprincipal?: string | null;
+  postre?: string | null;
+  descripcion?: string | null;
+  precio: string;
   disponible: number;
   createdAt?: string;
   updatedAt?: string;
 }
 
-const API_URL = "http://localhost:3000/api/menus";
-
-export const getMenus = async (): Promise<MenuDTO[]> => {
-  const response = await fetch(API_URL, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    credentials: "include",
-  });
-
-  if (!response.ok) {
-    throw new Error("Error fetching menus");
-  }
-
-  return response.json();
+// Usamos el mismo patrón que en bebidas: URL base + /recurso
+export const getMenus = async (): Promise<MenusDTO[]> => {
+  const response = await axios.get<MenusDTO[]>(`${API_URL}/menus`);
+  return response.data;
 };
 
-export const createMenu = async (menu: Partial<MenuDTO>): Promise<MenuDTO> => {
-  const response = await fetch(API_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    credentials: "include",
-    body: JSON.stringify(menu),
-  });
-
-  if (!response.ok) {
-    throw new Error("Error creating menu");
-  }
-
-  return response.json();
+export const createMenu = async (data: Partial<MenusDTO>): Promise<MenusDTO> => {
+  const response = await axios.post<MenusDTO>(`${API_URL}/menus`, data);
+  return response.data;
 };
 
-export const updateMenu = async (id: number, menu: Partial<MenuDTO>): Promise<MenuDTO> => {
-  const response = await fetch(`${API_URL}/${id}`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    credentials: "include",
-    body: JSON.stringify(menu),
-  });
-
-  if (!response.ok) {
-    throw new Error("Error updating menu");
-  }
-
-  return response.json();
+export const updateMenu = async (id: number, data: Partial<MenusDTO>) => {
+  const response = await axios.put(`${API_URL}/menus/${id}`, data);
+  return response.data;
 };
 
-export const deleteMenu = async (id: number): Promise<void> => {
-  const response = await fetch(`${API_URL}/${id}`, {
-    method: "DELETE",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    credentials: "include",
-  });
-
-  if (!response.ok) {
-    throw new Error("Error deleting menu");
-  }
+export const deleteMenu = async (id: number) => {
+  const response = await axios.delete(`${API_URL}/menus/${id}`);
+  return response.data;
 };

@@ -31,6 +31,7 @@ export class MenusService {
     const menu = await this.menusRepository.preload({
       id: id,
       ...updateMenusDto,
+      precio: updateMenusDto.precio ? String(updateMenusDto.precio) : undefined,
     });
 
     if (!menu) {

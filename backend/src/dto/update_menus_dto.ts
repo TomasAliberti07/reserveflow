@@ -3,23 +3,23 @@ import { IsString, IsInt, IsOptional, IsNumber } from 'class-validator';
 export class UpdateMenusDto {
   @IsOptional()
   @IsString()
-  entrada?: string;
+  nombre?: string;
 
   @IsOptional()
   @IsString()
-  plato_principal?: string;
+  plaprincipal?: string | null;
 
   @IsOptional()
   @IsString()
-  postre?: string;
+  postre?: string | null;
 
   @IsOptional()
   @IsString()
-  descripcion?: string;
+  descripcion?: string | null;
 
   @IsOptional()
-  @IsNumber()
-  precio?: number;
+  @IsString()
+  precio?: string;
 
   @IsOptional()
   @IsInt()

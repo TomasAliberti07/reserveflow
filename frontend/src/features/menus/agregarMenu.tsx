@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, type FormEvent } from "react";
 import { Input } from "../../components/ui/input";
 import { Button } from "../../components/ui/button";
 import type { MenusDTO } from "../../api/menus.api";
@@ -11,45 +11,46 @@ interface AgregarMenuProps {
   menuInicial?: Partial<MenusDTO>;
 }
 
+const opcionesCategorias = [
+  "Entrada",
+  "Plato principal",
+  "Postre",
+] as const;
+
 export default function AgregarMenu({ open, onClose, onSubmit, menuInicial }: AgregarMenuProps) {
-  const [entrada, setEntrada] = useState("");
-  const [platprincipal, setPlatPrincipal] = useState("");
-  const [postre, setPostre] = useState("");
+  const [nombre, setNombre] = useState("");
+  const [categoria, setCategoria] = useState<string>(opcionesCategorias[0]);
   const [descripcion, setDescripcion] = useState("");
   const [disponible, setDisponible] = useState(true);
   const [precio, setPrecio] = useState("");
 
   useEffect(() => {
     if (open) {
-      setEntrada(menuInicial?.nombre ?? "");
-      setPlatPrincipal(menuInicial?.plaprincipal ?? "");
-      setPostre(menuInicial?.postre ?? "");
+      setNombre(menuInicial?.nombre ?? "");
+      setCategoria(menuInicial?.categoria ?? opcionesCategorias[0]);
       setDescripcion(menuInicial?.descripcion ?? "");
       setDisponible(menuInicial?.disponible === 1);
       setPrecio(menuInicial?.precio ? String(menuInicial.precio) : "");
     } else {
-      setEntrada("");
-      setPlatPrincipal("");
-      setPostre("");
+      setNombre("");
+      setCategoria(opcionesCategorias[0]);
       setDescripcion("");
       setDisponible(true);
       setPrecio("");
     }
   }, [open, menuInicial]);
 
-  const manejarSubmit = async (e: React.FormEvent) => {
+  const manejarSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
-    if (!entrada || !platprincipal || !postre || !descripcion || precio === "") {
+    if (!nombre || !categoria || !descripcion || precio === "") {
       alert("Por favor completa todos los campos");
       return;
     }
 
-    // Único cambio: Mapear los nombres de los estados a los que espera el DTO/Entity
     const menu = {
-      nombre: entrada.trim(),           // 'entrada' viaja como 'nombre'
-      plaprincipal: platprincipal.trim(), // 'platprincipal' viaja como 'plaprincipal'
-      postre: postre.trim(),
+      nombre: nombre.trim(),
+      categoria,
       descripcion: descripcion.trim(),
       disponible: disponible ? 1 : 0,
       precio: precio,
@@ -66,25 +67,26 @@ export default function AgregarMenu({ open, onClose, onSubmit, menuInicial }: Ag
         <h2>{menuInicial ? "Editar Menú" : "Nuevo Menú"}</h2>
         <form onSubmit={manejarSubmit} className="menu-form">
           <Input
-            label="Entrada"
+            label="Nombre"
             type="text"
-            value={entrada}
-            onChange={(e) => setEntrada(e.target.value)}
+            value={nombre}
+            onChange={(e) => setNombre(e.target.value)}
           />
 
-          <Input
-            label="Plato Principal"
-            type="text"
-            value={platprincipal}
-            onChange={(e) => setPlatPrincipal(e.target.value)}
-          />
-
-          <Input
-            label="Postre"
-            type="text"
-            value={postre}
-            onChange={(e) => setPostre(e.target.value)}
-          />
+          <div className="form-group">
+            <label>Categoría</label>
+            <select
+              className="menu-select"
+              value={categoria}
+              onChange={(e) => setCategoria(e.target.value)}
+            >
+              {opcionesCategorias.map((opcion) => (
+                <option key={opcion} value={opcion}>
+                  {opcion}
+                </option>
+              ))}
+            </select>
+          </div>
 
           <div className="form-group">
             <label>Descripción</label>

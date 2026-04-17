@@ -7,6 +7,10 @@ export class UpdateMenusDto {
 
   @IsOptional()
   @IsString()
+  categoria?: string;
+
+  @IsOptional()
+  @IsString()
   plaprincipal?: string | null;
 
   @IsOptional()

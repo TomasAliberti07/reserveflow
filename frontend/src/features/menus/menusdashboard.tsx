@@ -17,6 +17,7 @@ export default function MenuDashboard() {
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
   const [menuParaEditar, setMenuParaEditar] = useState<MenusDTO | null>(null);
   const [busqueda, setBusqueda] = useState("");
+  const [categoriaFiltro, setCategoriaFiltro] = useState<string>("");
 
   const [popupOpen, setPopupOpen] = useState(false);
   const [popupTitle, setPopupTitle] = useState<string | undefined>(undefined);
@@ -40,11 +41,22 @@ export default function MenuDashboard() {
     }
   };
 
-  const menusFiltrados = menus.filter((menu) =>
-    menu.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
-    (menu.plaprincipal ?? "").toLowerCase().includes(busqueda.toLowerCase()) ||
-    (menu.postre ?? "").toLowerCase().includes(busqueda.toLowerCase())
-  );
+  const categorias = ["Entrada", "Plato principal", "Postre"];
+
+  const menusFiltrados = menus
+    .filter((menu) =>
+      menu.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
+      (menu.categoria ?? "").toLowerCase().includes(busqueda.toLowerCase()) ||
+      (menu.descripcion ?? "").toLowerCase().includes(busqueda.toLowerCase())
+    )
+    .filter((menu) =>
+      categoriaFiltro === "" || menu.categoria === categoriaFiltro
+    );
+
+  const menusPorCategoria = categorias.reduce((acc, categoria) => {
+    acc[categoria] = menusFiltrados.filter((menu) => menu.categoria === categoria);
+    return acc;
+  }, {} as Record<string, MenusDTO[]>);
 
   const abrirFormularioNuevo = () => {
     setMenuParaEditar(null);
@@ -133,7 +145,7 @@ export default function MenuDashboard() {
       <hr className="menu-dashboard-hr" />
       
       {/* Barra de búsqueda */}
-      <div className="menu-dashboard-search">
+      <div className="menu-dashboard-search-row">
         <input
           type="text"
           placeholder="Buscar menú..."
@@ -141,6 +153,16 @@ export default function MenuDashboard() {
           onChange={(e) => setBusqueda(e.target.value)}
           className="menu-dashboard-search-input"
         />
+        <select
+          value={categoriaFiltro}
+          onChange={(e) => setCategoriaFiltro(e.target.value)}
+          className="menu-dashboard-search-select"
+        >
+          <option value="">Todas las categorías</option>
+          <option value="Entrada">Entrada</option>
+          <option value="Plato principal">Plato principal</option>
+          <option value="Postre">Postre</option>
+        </select>
       </div>
 
       {/* Lista de menus usando Grid para mejor diseño responsivo */}
@@ -149,51 +171,60 @@ export default function MenuDashboard() {
       {cargando ? (
         <p className="menu-dashboard-no-results">Cargando menús...</p>
       ) : (
-        <Grid cols={3} gap={4}>
-          {menusFiltrados.map((menu, index) => (
-            <div 
-              key={menu.id ?? index} 
-              className="menu-dashboard-card"
-            >
-              <div className="menu-dashboard-card-header">
-                <h4 className="menu-dashboard-card-title">{menu.nombre} - {menu.plaprincipal} - {menu.postre}</h4>
-                <div className="menu-dashboard-card-actions">
-                  <button
-                    type="button"
-                    className="menu-dashboard-card-action"
-                    aria-label="Editar menú"
-                    onClick={() => abrirFormularioEdicion(menu)}
-                  >
-                    <FaEdit />
-                  </button>
-                  <button
-                    type="button"
-                    className="menu-dashboard-card-action"
-                    aria-label="Eliminar menú"
-                    onClick={() => handleEliminarMenu(menu.id)}
-                  >
-                    <FaTrash />
-                  </button>
-                </div>
+        <>
+          {categorias.map((categoria) => (
+            menusPorCategoria[categoria].length > 0 ? (
+              <div key={categoria} className="menu-dashboard-category-group">
+                <h4 className="menu-dashboard-category-title">{categoria}</h4>
+                <Grid cols={3} gap={4}>
+                  {menusPorCategoria[categoria].map((menu) => (
+                    <div key={menu.id} className="menu-dashboard-card">
+                      <div className="menu-dashboard-card-header">
+                        <h4 className="menu-dashboard-card-title">{menu.nombre}</h4>
+                        <div className="menu-dashboard-card-actions">
+                          <button
+                            type="button"
+                            className="menu-dashboard-card-action"
+                            aria-label="Editar menú"
+                            onClick={() => abrirFormularioEdicion(menu)}
+                          >
+                            <FaEdit />
+                          </button>
+                          <button
+                            type="button"
+                            className="menu-dashboard-card-action"
+                            aria-label="Eliminar menú"
+                            onClick={() => handleEliminarMenu(menu.id)}
+                          >
+                            <FaTrash />
+                          </button>
+                        </div>
+                      </div>
+                      <div className="menu-dashboard-card-details">
+                        <p className="menu-dashboard-card-detail">
+                          <strong>Categoría:</strong> {menu.categoria}
+                        </p>
+                        <p className="menu-dashboard-card-detail">
+                          <strong>Descripción:</strong> {menu.descripcion}
+                        </p>
+                        <p className="menu-dashboard-card-detail">Precio: <strong>${menu.precio}</strong></p>
+                        <p className="menu-dashboard-card-detail">
+                          Estado: 
+                          <span 
+                            className="menu-dashboard-status" 
+                            style={{ color: menu.disponible === 1 ? "#4dff4d" : "#ff4d4d" }}
+                          >
+                            {menu.disponible === 1 ? " Disponible" : " No disponible"}
+                          </span>
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </Grid>
               </div>
-              <div className="menu-dashboard-card-details">
-                <p className="menu-dashboard-card-detail">
-                  <strong>Descripción:</strong> {menu.descripcion}
-                </p>
-                <p className="menu-dashboard-card-detail">Precio: <strong>${menu.precio}</strong></p>
-                <p className="menu-dashboard-card-detail">
-                  Estado: 
-                  <span 
-                    className="menu-dashboard-status" 
-                    style={{ color: menu.disponible === 1 ? "#4dff4d" : "#ff4d4d" }}
-                  >
-                    {menu.disponible === 1 ? " Disponible" : " No disponible"}
-                  </span>
-                </p>
-              </div>
-            </div>
+            ) : null
           ))}
-        </Grid>
+        </>
       )}
 
       {!cargando && menusFiltrados.length === 0 && (

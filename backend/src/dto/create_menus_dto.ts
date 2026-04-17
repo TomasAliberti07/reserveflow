@@ -6,6 +6,10 @@ export class CreateMenusDto {
   nombre!: string;
 
   @IsString()
+  @IsNotEmpty({ message: 'La categoría es obligatoria' })
+  categoria!: string;
+
+  @IsString()
   @IsOptional()
   descripcion?: string | null;
 

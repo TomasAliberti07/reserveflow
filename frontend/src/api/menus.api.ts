@@ -5,6 +5,7 @@ const API_URL = "http://localhost:3000";
 export interface MenusDTO {
   id?: number;
   nombre: string;
+  categoria?: string;
   plaprincipal?: string | null;
   postre?: string | null;
   descripcion?: string | null;

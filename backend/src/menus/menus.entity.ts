@@ -8,6 +8,9 @@ export class Menus {
   @Column({ type: 'varchar', length: 150 })
   nombre!: string;
 
+  @Column({ type: 'varchar', length: 100 })
+  categoria!: string;
+
   @Column({ type: 'varchar', length: 500, nullable: true })
   descripcion!: string | null;
 

@@ -28,4 +28,8 @@ export class CreateMenusDto {
   @IsInt() // Si el frontend envía un número, esto está bien. 
   @IsOptional() // Opcional por si el default lo pone la DB
   disponible!: number;
+
+  @IsString()
+  @IsOptional()
+  dieta_especifica?: string | null;
 }

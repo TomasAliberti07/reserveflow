@@ -1,4 +1,4 @@
-import { IsString, IsInt, IsOptional, IsNumber } from 'class-validator';
+import { IsString, IsInt, IsOptional } from 'class-validator';
 
 export class UpdateMenusDto {
   @IsOptional()
@@ -28,4 +28,9 @@ export class UpdateMenusDto {
   @IsOptional()
   @IsInt()
   disponible?: number;
+
+  
+  @IsOptional()
+  @IsString()
+  dieta_especifica?: string | null;
 }

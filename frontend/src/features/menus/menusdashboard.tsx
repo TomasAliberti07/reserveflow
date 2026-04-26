@@ -18,11 +18,20 @@ export default function MenuDashboard() {
   const [menuParaEditar, setMenuParaEditar] = useState<MenusDTO | null>(null);
   const [busqueda, setBusqueda] = useState("");
   const [categoriaFiltro, setCategoriaFiltro] = useState<string>("");
+  const [dietaEspecificaFiltro, setDietaEspecificaFiltro] = useState<string>("");
 
   const [popupOpen, setPopupOpen] = useState(false);
   const [popupTitle, setPopupTitle] = useState<string | undefined>(undefined);
   const [popupMessage, setPopupMessage] = useState("");
   const [popupType, setPopupType] = useState<"success" | "error" | "info">("info");
+
+  // Colores para cada tipo de dieta especial
+  const coloresDieta: Record<string, { bg: string; text: string }> = {
+    Celiaco: { bg: "#FFD700", text: "#000" },
+    Diabetico: { bg: "#007AFF", text: "#fff" },
+    Vegano: { bg: "#34C759", text: "#000" },
+    Vegetariano: { bg: "#2E7D32", text: "#fff" },
+  };
 
   // Cargar menus de la API al montar el componente
   useEffect(() => {
@@ -41,7 +50,7 @@ export default function MenuDashboard() {
     }
   };
 
-  const categorias = ["Entrada", "Plato principal", "Postre"];
+  const categorias = ["Entrada", "Principal", "Postre", "Bebida", "Especial"];
 
   const menusFiltrados = menus
     .filter((menu) =>
@@ -51,7 +60,15 @@ export default function MenuDashboard() {
     )
     .filter((menu) =>
       categoriaFiltro === "" || menu.categoria === categoriaFiltro
-    );
+    )
+    .filter((menu) => {
+      // Si no hay filtro de dieta especial o la categoría no es 'Especial', mostrar todos
+      if (dietaEspecificaFiltro === "" || categoriaFiltro !== "Especial") {
+        return true;
+      }
+      // Si hay filtro de dieta especial y la categoría es 'Especial', filtrar por dieta
+      return menu.dieta_especifica === dietaEspecificaFiltro;
+    });
 
   const menusPorCategoria = categorias.reduce((acc, categoria) => {
     acc[categoria] = menusFiltrados.filter((menu) => menu.categoria === categoria);
@@ -155,13 +172,32 @@ export default function MenuDashboard() {
         />
         <select
           value={categoriaFiltro}
-          onChange={(e) => setCategoriaFiltro(e.target.value)}
+          onChange={(e) => {
+            setCategoriaFiltro(e.target.value);
+            // Resetear el filtro de dieta especial cuando cambien la categoría
+            setDietaEspecificaFiltro("");
+          }}
           className="menu-dashboard-search-select"
         >
           <option value="">Todas las categorías</option>
           <option value="Entrada">Entrada</option>
-          <option value="Plato principal">Plato principal</option>
+          <option value="Principal">Principal</option>
           <option value="Postre">Postre</option>
+          <option value="Bebida">Bebida</option>
+          <option value="Especial">Especial</option>
+        </select>
+        <select
+          value={dietaEspecificaFiltro}
+          onChange={(e) => setDietaEspecificaFiltro(e.target.value)}
+          disabled={categoriaFiltro !== "Especial"}
+          className="menu-dashboard-search-select"
+          title={categoriaFiltro !== "Especial" ? "Selecciona 'Especial' en la categoría para usar este filtro" : ""}
+        >
+          <option value="">Todas las dietas</option>
+          <option value="Celiaco">Celiaco</option>
+          <option value="Diabetico">Diabetico</option>
+          <option value="Vegano">Vegano</option>
+          <option value="Vegetariano">Vegetariano</option>
         </select>
       </div>
 
@@ -180,7 +216,26 @@ export default function MenuDashboard() {
                   {menusPorCategoria[categoria].map((menu) => (
                     <div key={menu.id} className="menu-dashboard-card">
                       <div className="menu-dashboard-card-header">
-                        <h4 className="menu-dashboard-card-title">{menu.nombre}</h4>
+                        <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+                          <h4 className="menu-dashboard-card-title">{menu.nombre}</h4>
+                          {menu.dieta_especifica && (
+                            <span
+                              style={{
+                                display: "inline-block",
+                                backgroundColor: coloresDieta[menu.dieta_especifica]?.bg || "#999",
+                                color: coloresDieta[menu.dieta_especifica]?.text || "#000",
+                                padding: "4px 10px",
+                                borderRadius: "12px",
+                                fontSize: "12px",
+                                fontWeight: "bold",
+                                whiteSpace: "nowrap",
+                              }}
+                              title={`Dieta: ${menu.dieta_especifica}`}
+                            >
+                              {menu.dieta_especifica}
+                            </span>
+                          )}
+                        </div>
                         <div className="menu-dashboard-card-actions">
                           <button
                             type="button"

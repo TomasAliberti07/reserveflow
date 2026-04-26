@@ -13,8 +13,17 @@ interface AgregarMenuProps {
 
 const opcionesCategorias = [
   "Entrada",
-  "Plato principal",
+  "Principal",
   "Postre",
+  "Bebida",
+  "Especial",
+] as const;
+
+const opcionesDieta = [
+  "Celiaco",
+  "Diabetico",
+  "Vegano",
+  "Vegetariano",
 ] as const;
 
 export default function AgregarMenu({ open, onClose, onSubmit, menuInicial }: AgregarMenuProps) {
@@ -23,6 +32,7 @@ export default function AgregarMenu({ open, onClose, onSubmit, menuInicial }: Ag
   const [descripcion, setDescripcion] = useState("");
   const [disponible, setDisponible] = useState(true);
   const [precio, setPrecio] = useState("");
+  const [dietaEspecifica, setDietaEspecifica] = useState("");
 
   useEffect(() => {
     if (open) {
@@ -31,12 +41,14 @@ export default function AgregarMenu({ open, onClose, onSubmit, menuInicial }: Ag
       setDescripcion(menuInicial?.descripcion ?? "");
       setDisponible(menuInicial?.disponible === 1);
       setPrecio(menuInicial?.precio ? String(menuInicial.precio) : "");
+      setDietaEspecifica(menuInicial?.dieta_especifica ?? "");
     } else {
       setNombre("");
       setCategoria(opcionesCategorias[0]);
       setDescripcion("");
       setDisponible(true);
       setPrecio("");
+      setDietaEspecifica("");
     }
   }, [open, menuInicial]);
 
@@ -48,12 +60,19 @@ export default function AgregarMenu({ open, onClose, onSubmit, menuInicial }: Ag
       return;
     }
 
+    // Validar que si la categoría es 'Especial', dieta_especifica esté seleccionado
+    if (categoria === "Especial" && !dietaEspecifica) {
+      alert("Por favor selecciona una dieta especial");
+      return;
+    }
+
     const menu = {
       nombre: nombre.trim(),
       categoria,
       descripcion: descripcion.trim(),
       disponible: disponible ? 1 : 0,
-      precio: precio,
+      precio: String(precio),
+      dieta_especifica: categoria === "Especial" && dietaEspecifica ? dietaEspecifica : null,
     };
 
     await onSubmit(menu);
@@ -78,7 +97,14 @@ export default function AgregarMenu({ open, onClose, onSubmit, menuInicial }: Ag
             <select
               className="menu-select"
               value={categoria}
-              onChange={(e) => setCategoria(e.target.value)}
+              onChange={(e) => {
+                const newCategoria = e.target.value;
+                setCategoria(newCategoria);
+                // Resetear dieta_especifica si la nueva categoría no es 'Especial'
+                if (newCategoria !== "Especial") {
+                  setDietaEspecifica("");
+                }
+              }}
             >
               {opcionesCategorias.map((opcion) => (
                 <option key={opcion} value={opcion}>
@@ -87,6 +113,24 @@ export default function AgregarMenu({ open, onClose, onSubmit, menuInicial }: Ag
               ))}
             </select>
           </div>
+
+          {categoria === "Especial" && (
+            <div className="form-group">
+              <label>Dieta Especial</label>
+              <select
+                className="menu-select"
+                value={dietaEspecifica}
+                onChange={(e) => setDietaEspecifica(e.target.value)}
+              >
+                <option value="">Selecciona una dieta especial</option>
+                {opcionesDieta.map((opcion) => (
+                  <option key={opcion} value={opcion}>
+                    {opcion}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
 
           <div className="form-group">
             <label>Descripción</label>

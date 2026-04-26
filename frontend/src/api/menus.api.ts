@@ -9,6 +9,7 @@ export interface MenusDTO {
   plaprincipal?: string | null;
   postre?: string | null;
   descripcion?: string | null;
+  dieta_especifica?: string | null;
   precio: string;
   disponible: number;
   createdAt?: string;

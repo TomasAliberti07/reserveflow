@@ -13,7 +13,14 @@ export class MenusService {
   ) {}
 
   async create(createMenusDto: CreateMenusDto): Promise<Menus> {
-    const nuevoMenu = this.menusRepository.create(createMenusDto);
+    const menuData = { ...createMenusDto };
+    
+    // Si la categoría no es 'ESPECIAL', establecer dieta_especifica como null
+    if (menuData.categoria !== 'ESPECIAL') {
+      menuData.dieta_especifica = null;
+    }
+    
+    const nuevoMenu = this.menusRepository.create(menuData);
     return await this.menusRepository.save(nuevoMenu);
   }
 

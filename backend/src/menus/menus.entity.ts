@@ -26,6 +26,9 @@ export class Menus {
   @Column({ type: 'tinyint', width: 1 })
   disponible!: number;
 
+  @Column({ type: 'varchar', length: 500, nullable: true })
+  dieta_especifica!: string | null;
+
 @CreateDateColumn({ 
     name: 'creacion', 
     type: 'datetime' 

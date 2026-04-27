@@ -1,17 +1,21 @@
-import { IsString, IsNumber, IsNotEmpty, IsInt, Min } from 'class-validator';
+import { IsString, IsNumber, IsNotEmpty, IsInt, Min, Matches } from 'class-validator';
+import { Transform } from 'class-transformer';
 
 export class CreateBebidaDto {
-  @IsString()
+  @IsString({ message: 'El nombre debe ser texto' })
   @IsNotEmpty({ message: 'El nombre es obligatorio' })
+  @Matches(/^[a-záéíóúñ\s]*$/, { message: 'El nombre solo puede contener letras' })
+  @Transform(({ value }) => value ? value.trim().toLowerCase() : value)
   nombre!: string;
 
-  @IsInt() // Porque enviamos 0 o 1
+  @IsInt({ message: 'El alcohol debe ser 0 o 1' })
   alcohol!: number;
 
-  @IsString() // Porque lo manejamos como string para el decimal de la DB
+  @IsString({ message: 'El precio debe ser texto' })
+  @IsNotEmpty({ message: 'El precio es obligatorio' })
   precio!: string;
 
-  @IsInt()
-  @Min(0)
+  @IsInt({ message: 'El stock debe ser un número entero' })
+  @Min(0, { message: 'El stock no puede ser negativo' })
   stock!: number;
 }

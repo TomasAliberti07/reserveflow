@@ -1,5 +1,5 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
-
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { User } from '../users/user.entity';
 @Entity('bebida')
 export class Bebida {
   @PrimaryGeneratedColumn()
@@ -16,7 +16,12 @@ export class Bebida {
 
   @Column({ type: 'int', default: 0 })
   stock!: number;
+  @Column({ name: 'users_id' })
+  users_id!: number;
 
+  @ManyToOne(() => User)
+  @JoinColumn({ name: 'users_id' })
+  user!: User;
   @CreateDateColumn({ type: 'datetime' })
   creacion!: Date;
 

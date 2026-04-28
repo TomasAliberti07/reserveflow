@@ -16,23 +16,37 @@ export interface MenusDTO {
   updatedAt?: string;
 }
 
-// Usamos el mismo patrón que en bebidas: URL base + /recurso
+const getAuthHeaders = () => {
+  const token = localStorage.getItem("token"); 
+  return {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  };
+};
+
+// --- PETICIONES ---
+
 export const getMenus = async (): Promise<MenusDTO[]> => {
-  const response = await axios.get<MenusDTO[]>(`${API_URL}/menus`);
+  // En GET, el segundo parámetro son las opciones (donde van los headers)
+  const response = await axios.get<MenusDTO[]>(`${API_URL}/menus`, getAuthHeaders());
   return response.data;
 };
 
 export const createMenu = async (data: Partial<MenusDTO>): Promise<MenusDTO> => {
-  const response = await axios.post<MenusDTO>(`${API_URL}/menus`, data);
+  // En POST, el segundo parámetro es el BODY y el TERCERO son las opciones
+  const response = await axios.post<MenusDTO>(`${API_URL}/menus`, data, getAuthHeaders());
   return response.data;
 };
 
 export const updateMenu = async (id: number, data: Partial<MenusDTO>) => {
-  const response = await axios.put(`${API_URL}/menus/${id}`, data);
+  // En PUT, el tercer parámetro son las opciones
+  const response = await axios.put(`${API_URL}/menus/${id}`, data, getAuthHeaders());
   return response.data;
 };
 
 export const deleteMenu = async (id: number) => {
-  const response = await axios.delete(`${API_URL}/menus/${id}`);
+  // En DELETE, el segundo parámetro son las opciones
+  const response = await axios.delete(`${API_URL}/menus/${id}`, getAuthHeaders());
   return response.data;
 };

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Bebida } from './bebida.entity';
@@ -12,44 +12,51 @@ export class BebidaService {
     private bebidaRepository: Repository<Bebida>,
   ) {}
 
-  // Use async para esperar el impacto real en la DB
-  async create(createBebidaDto: CreateBebidaDto): Promise<Bebida> {
-    // console.log('Recibiendo en Service:', createBebidaDto);
+  
+  async create(createBebidaDto: CreateBebidaDto, userId: number): Promise<Bebida> {
+    const nuevaBebida = this.bebidaRepository.create({
+      ...createBebidaDto,
+      users_id: userId, 
+    });
     
-    const nuevaBebida = this.bebidaRepository.create(createBebidaDto);
-    
-    // Use await para asegurar que el registro se guarde antes de continuar
     return await this.bebidaRepository.save(nuevaBebida);
   }
 
-  async findAll(): Promise<Bebida[]> {
-    return await this.bebidaRepository.find();
+  
+  async findAll(userId: number): Promise<Bebida[]> {
+    return await this.bebidaRepository.find({
+      where: { users_id: userId }, 
+      order: { nombre: 'ASC' }     
+    });
   }
 
-  async findOne(id: number): Promise<Bebida> {
-    const bebida = await this.bebidaRepository.findOne({ where: { id } });
-    if (!bebida) throw new NotFoundException(`La bebida con ID ${id} no existe`);
+ 
+  async findOne(id: number, userId: number): Promise<Bebida> {
+    const bebida = await this.bebidaRepository.findOne({ 
+      where: { id, users_id: userId } 
+    });
+
+    if (!bebida) {
+      throw new NotFoundException(`La bebida con ID ${id} no existe en su inventario`);
+    }
     return bebida;
   }
 
 
- async update(id: number, updateBebidaDto: UpdateBebidaDto): Promise<Bebida> {
-    const bebida = await this.bebidaRepository.preload({
-      id: id,                
-      ...updateBebidaDto,   
-    });
+  async update(id: number, updateBebidaDto: UpdateBebidaDto, userId: number): Promise<Bebida> {
+    
+    const bebidaExistente = await this.findOne(id, userId);
 
-    if (!bebida) {
-      throw new NotFoundException(`No se encontró la bebida con ID ${id}`);
-    }
+    
+    const bebidaEditada = this.bebidaRepository.merge(bebidaExistente, updateBebidaDto);
 
-    return await this.bebidaRepository.save(bebida);
+    return await this.bebidaRepository.save(bebidaEditada);
   }
 
-  async delete(id: number): Promise<void> {
-    const resultado = await this.bebidaRepository.delete(id);
-    if (resultado.affected === 0) {
-      throw new NotFoundException(`No se pudo eliminar: ID ${id} no encontrado`);
-    }
+  
+  async delete(id: number, userId: number): Promise<void> {
+    // Usamos findOne para validar existencia y propiedad antes de borrar
+    const bebida = await this.findOne(id, userId);
+    await this.bebidaRepository.remove(bebida);
   }
 }

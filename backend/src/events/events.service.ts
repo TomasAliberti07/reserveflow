@@ -2,7 +2,7 @@ import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Event } from './events.entity';
-import { Salon } from '../salons/salons.entity';    
+import { Salones } from '../salons/salons.entity';    
 
 @Injectable()
 export class EventsService {
@@ -10,8 +10,8 @@ export class EventsService {
     @InjectRepository(Event)
     private eventRepository: Repository<Event>,
 
-    @InjectRepository(Salon)
-    private salonRepository: Repository<Salon>,
+    @InjectRepository(Salones)
+    private salonRepository: Repository<Salones>,
   ) {}
 
   async findAll() {

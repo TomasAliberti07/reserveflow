@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Put, Delete, Param, Req, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Put, Delete, Param, Req, UseGuards, Patch } from '@nestjs/common';
 import { MenusService } from './menus.service';
 import { CreateMenusDto } from '../dto/create_menus_dto';
 import { UpdateMenusDto } from '../dto/update_menus_dto';
@@ -24,7 +24,7 @@ export class MenusController {
     return this.menusService.findOne(+id, req.user.id);
   }
 
-  @Put(':id')
+  @Patch(':id')
   update(@Param('id') id: string, @Body() updateMenusDto: UpdateMenusDto, @Req() req) {
     return this.menusService.update(+id, updateMenusDto, req.user.id);
   }

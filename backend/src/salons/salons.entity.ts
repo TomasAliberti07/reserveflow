@@ -10,32 +10,32 @@ import {
 import { User } from '../users/user.entity';
 
 @Entity('salones')
-export class Salon {
+export class Salones {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @ManyToOne(() => User)
   @JoinColumn({ name: 'users_id' })
-  user: User;
+  user!: User;
 
   @Column({ length: 100 })
-  nombre: string;
+  nombre!: string;
 
   @Column({ length: 255 })
-  localizacion: string;
+  localizacion!: string;
 
   @Column({ type: 'int' })
-  mincapacidad: number;
+  mincapacidad!: number;
 
   @Column({ type: 'int' })
-  maxcapacidad: number;
+  maxcapacidad!: number;
 
   @Column({ type: 'boolean', default: true })
-  estado: boolean;
+  estado!: boolean;
 
   @CreateDateColumn({ name: 'creacion' })
-  creacion: Date;
+  creacion!: Date;
 
   @UpdateDateColumn({ name: 'actualizacion' })
-  actualizacion: Date;
+  actualizacion!: Date;
 }

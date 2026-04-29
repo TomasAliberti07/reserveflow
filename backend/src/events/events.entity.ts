@@ -7,47 +7,47 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Salon } from '../salons/salons.entity';
+import { Salones } from '../salons/salons.entity';
 
 @Entity('evento')
 export class Event {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
-  @ManyToOne(() => Salon)
+  @ManyToOne(() => Salones)
   @JoinColumn({ name: 'salon_id' })
-  salon: Salon;
+  salon!: Salones;
 
   @Column({ length: 100 })
-  cliente_nombre: string;
+  cliente_nombre!: string;
 
   @Column({ length: 100 })
-  cliente_apellido: string;
+  cliente_apellido!: string;
 
   @Column({ length: 150 })
-  cliente_email: string;
+  cliente_email!: string;
 
   @Column({ length: 20 })
-  cliente_numero: string;
+  cliente_numero!: string;
 
   @Column({ type: 'int' })
-  cant_invitados: number;
+  cant_invitados!: number;
 
   @Column({ type: 'datetime' })
-  comienzo: Date;
+  comienzo!: Date;
 
   @Column({ type: 'datetime' })
-  finaliza: Date;
+  finaliza!: Date;
 
   @Column({ length: 50 })
-  estado: string; // pendiente | confirmado | cancelado
+  estado!: string; // pendiente | confirmado | cancelado
 
   @Column({ type: 'text', nullable: true })
   notas?: string;
 
   @CreateDateColumn({ name: 'creado' })
-  creado: Date;
+  creado!: Date;
 
   @UpdateDateColumn({ name: 'actualizado' })
-  actualizado: Date;
+  actualizado!: Date;
 }

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Put, Delete, Param, Req, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body,Delete, Param, Req, UseGuards, Patch } from '@nestjs/common';
 import { BebidaService } from './bebida.service';
 import { CreateBebidaDto } from '../dto/create_bebida_dto';
 import { UpdateBebidaDto } from '../dto/update_bebida_dto';
@@ -24,7 +24,7 @@ export class BebidaController {
     return this.bebidaService.findOne(+id, req.user.id);
   }
 
-  @Put(':id')
+  @Patch(':id')
   update(@Param('id') id: string, @Body() updateBebidaDto: UpdateBebidaDto, @Req() req) {
     return this.bebidaService.update(+id, updateBebidaDto, req.user.id);
   }

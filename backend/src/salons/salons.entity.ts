@@ -2,9 +2,9 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
+  ManyToOne,
   CreateDateColumn,
   UpdateDateColumn,
-  ManyToOne,
   JoinColumn,
 } from 'typeorm';
 import { User } from '../users/user.entity';
@@ -30,12 +30,12 @@ export class Salones {
   @Column({ type: 'int' })
   maxcapacidad!: number;
 
-  @Column({ type: 'boolean', default: true })
-  estado!: boolean;
+  @Column({  type: 'tinyint', default: 1 })
+  estado!: number;
 
-  @CreateDateColumn({ name: 'creacion' })
-  creacion!: Date;
-
-  @UpdateDateColumn({ name: 'actualizacion' })
-  actualizacion!: Date;
+  @CreateDateColumn({ type: 'datetime' })
+    creacion!: Date;
+  
+  @UpdateDateColumn({ type: 'datetime' })
+    actualizacion!: Date;
 }

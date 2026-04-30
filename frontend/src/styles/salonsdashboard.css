@@ -1,0 +1,236 @@
+/* SalonsDashboard Styles */
+
+.salons-dashboard {
+  padding: 2rem;
+  min-height: calc(100vh - 95px);
+  background: transparent;
+}
+
+.salons-dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.salons-dashboard-title {
+  margin: 0;
+  color: #fff;
+}
+
+.salons-dashboard-button {
+  width: auto;
+}
+
+.salons-dashboard-hr {
+  margin: 2rem 0;
+  border-color: #444;
+}
+
+.salons-dashboard-search {
+  margin-bottom: 1.5rem;
+  max-width: 400px;
+}
+
+.salons-dashboard-search-input {
+  width: 100%;
+  padding: 0.75rem;
+  background-color: #222;
+  color: #fff;
+  border: 1px solid #555;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+}
+
+.salons-dashboard-search-input::placeholder {
+  color: #888;
+}
+
+.salons-dashboard-inventory-title {
+  color: #aaa;
+  margin-bottom: 1rem;
+}
+
+.salons-dashboard-card {
+  background-color: #222;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid #444;
+  position: relative;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.salons-dashboard-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.salons-dashboard-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.salons-dashboard-card-title {
+  margin: 0;
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.salons-dashboard-card-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.salons-dashboard-card-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  background: rgba(255, 255, 255, 0.04);
+  color: #e2e8f0;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.salons-dashboard-card-action:hover {
+  background: rgba(148, 163, 184, 0.18);
+  transform: translateY(-1px);
+}
+
+.salons-dashboard-card-action svg {
+  width: 16px;
+  height: 16px;
+}
+
+.salons-dashboard-card-details {
+  font-size: 0.9rem;
+  color: #ccc;
+}
+
+.salons-dashboard-card-detail {
+  margin: 0.4rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.salons-dashboard-status {
+  font-weight: 600;
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.salons-stats {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.salons-stats .card {
+  flex: 1;
+  min-width: 200px;
+}
+
+.salons-dashboard-no-results {
+  text-align: center;
+  color: #888;
+  padding: 2rem;
+}
+
+.salons-dashboard-grid {
+  margin-bottom: 2rem;
+}
+
+/* Agregar Salón Modal */
+.salons-agregar-card {
+  background: linear-gradient(
+    180deg,
+    rgba(55, 65, 81, 0.85),
+    rgba(2, 6, 23, 0.9)
+  );
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 2rem;
+  max-width: 500px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.salons-agregar-title {
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: #f8fafc;
+  text-shadow: 0 0 4px rgba(59, 130, 246, 0.35);
+}
+
+.salons-agregar-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.salons-agregar-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 1.5rem;
+}
+
+.salons-agregar-submit {
+  flex: 1;
+  max-width: 150px;
+}
+
+.salons-agregar-cancel {
+  flex: 1;
+  max-width: 150px;
+  background-color: #020617;
+  color: #e5e7eb;
+  border: 1px solid #444;
+}
+
+.salons-agregar-cancel:hover {
+  background-color: #1e293b;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .salons-dashboard {
+    padding: 1rem;
+  }
+
+  .salons-dashboard-header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+
+  .salons-dashboard-button {
+    width: 100%;
+  }
+
+  .salons-stats {
+    flex-direction: column;
+  }
+
+  .salons-stats .card {
+    min-width: 100%;
+  }
+
+  .salons-agregar-card {
+    max-width: 90vw;
+    padding: 1.5rem;
+  }
+}

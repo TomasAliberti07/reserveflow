@@ -22,7 +22,7 @@ export class SalonsService {
   async findActive(userId: number): Promise<Salones[]> {
     return await this.salonRepository.find({
       where: { 
-        estado: true, 
+        estado: 1, 
         user: { id: userId } 
       },
       order: { nombre: 'ASC' },
@@ -33,6 +33,7 @@ export class SalonsService {
   async create(createSalonDto: CreateSalonsDto, userId: number): Promise<Salones> {
     const nuevoSalon = this.salonRepository.create({
       ...createSalonDto,
+      estado: createSalonDto.estado ? 1 : 0,
       user: { id: userId }, 
     });
     return await this.salonRepository.save(nuevoSalon);
@@ -59,7 +60,7 @@ export class SalonsService {
   
   async remove(id: number, userId: number): Promise<Salones> {
     const salon = await this.findOne(id, userId);
-    salon.estado = false;
+    salon.estado = 0;
     return await this.salonRepository.save(salon);
   }
 }

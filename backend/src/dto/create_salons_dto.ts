@@ -25,5 +25,5 @@ export class CreateSalonsDto {
 
   @IsOptional()
   @Transform(({ value }) => value === 'true' || value === true || value === 1) 
-  estado?: boolean;
+  estado?: 1 | 0; 
 }

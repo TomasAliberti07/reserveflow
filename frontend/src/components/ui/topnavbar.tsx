@@ -4,7 +4,7 @@ import {
   FaCalendarAlt,
   FaCocktail,
   FaUtensils,
-  FaCog,
+  FaChair,
 } from "react-icons/fa";
 import "../../styles/topnavbar.css";
 
@@ -31,7 +31,7 @@ export default function TopNavbar() {
         </Link>
 
         <Link to="/salons" className="navbar-icon" aria-label="Salones">
-          <FaCog />
+          <FaChair />
         </Link>
       </div>
     </nav>

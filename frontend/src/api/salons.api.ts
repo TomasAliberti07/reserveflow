@@ -50,7 +50,7 @@ export const createSalon = async (
 };
 
 export const updateSalon = async (id: number, data: Partial<SalonsDTO>) => {
-  const response = await axios.put(
+  const response = await axios.patch(
     `${API_URL}/salons/${id}`,
     data,
     getAuthHeaders()

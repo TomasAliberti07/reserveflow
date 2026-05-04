@@ -33,7 +33,7 @@ export class SalonsService {
   async create(createSalonDto: CreateSalonsDto, userId: number): Promise<Salones> {
     const nuevoSalon = this.salonRepository.create({
       ...createSalonDto,
-      estado: createSalonDto.estado ? 1 : 0,
+      estado: createSalonDto.estado !== undefined ? Number(createSalonDto.estado) : 1,
       user: { id: userId }, 
     });
     return await this.salonRepository.save(nuevoSalon);

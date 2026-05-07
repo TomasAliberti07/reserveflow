@@ -9,6 +9,8 @@ export interface SalonsDTO {
   mincapacidad: number;
   maxcapacidad: number;
   estado: number;
+  creacion?: Date;
+  actualizacion?: Date;
 }
 
 const getAuthHeaders = () => {

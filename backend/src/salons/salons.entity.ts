@@ -7,6 +7,7 @@ import {
   UpdateDateColumn,
   JoinColumn,
 } from 'typeorm';
+import { Exclude } from 'class-transformer';
 import { User } from '../users/user.entity';
 
 @Entity('salones')
@@ -16,6 +17,7 @@ export class Salones {
 
   @ManyToOne(() => User)
   @JoinColumn({ name: 'users_id' })
+  @Exclude()
   user!: User;
 
   @Column({ length: 100 })

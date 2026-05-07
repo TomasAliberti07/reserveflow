@@ -93,7 +93,7 @@ export default function SalonsDashboard() {
         );
         setSalons((prev) =>
           prev.map((item) =>
-            item.id === salonParaEditar.id ? salonActualizado : item
+            item.id === salonParaEditar.id ? { ...salonActualizado } : item
           )
         );
         cerrarFormulario();
@@ -104,7 +104,7 @@ export default function SalonsDashboard() {
         );
       } else {
         const salonCreado = await createSalon(salonData);
-        setSalons((prev) => [...prev, salonCreado]);
+        setSalons((prev) => [...prev, { ...salonCreado }]);
         cerrarFormulario();
         mostrarPopup(
           "Salón agregado",
@@ -126,8 +126,12 @@ export default function SalonsDashboard() {
     if (id == null) return;
 
     try {
-      await deleteSalon(id);
-      setSalons((prev) => prev.filter((salon) => salon.id !== id));
+      const salonEliminado = await deleteSalon(id);
+      setSalons((prev) =>
+        prev.map((salon) =>
+          salon.id === id ? { ...salonEliminado } : salon
+        )
+      );
       mostrarPopup(
         "Salón eliminado",
         "El salón se eliminó correctamente.",
@@ -190,13 +194,13 @@ export default function SalonsDashboard() {
       </div>
 
       {/* Lista de salones usando Grid */}
-      <h3 className="salons-dashboard-inventory-title">Salones Disponibles</h3>
+      <h3 className="salons-dashboard-inventory-title">Salones Activos</h3>
 
       {cargando ? (
         <p className="salons-dashboard-no-results">Cargando salones...</p>
       ) : (
         <Grid cols={3} gap={4}>
-          {salonesFiltrados.map((salon, index) => (
+          {salonesFiltrados.filter(s => s.estado === 1).map((salon, index) => (
             <div
               key={salon.id ?? index}
               className="salons-dashboard-card"
@@ -246,9 +250,67 @@ export default function SalonsDashboard() {
         </Grid>
       )}
 
-      {!cargando && salonesFiltrados.length === 0 && (
+      {!cargando && salonesFiltrados.filter(s => s.estado === 1).length === 0 && (
         <p className="salons-dashboard-no-results">
-          No se encontraron salones.
+          No se encontraron salones activos.
+        </p>
+      )}
+
+      <h3 className="salons-dashboard-inventory-title">Salones Inactivos</h3>
+
+      <Grid cols={3} gap={4}>
+        {salonesFiltrados.filter(s => s.estado === 0).map((salon, index) => (
+          <div
+            key={salon.id ?? index}
+            className="salons-dashboard-card"
+          >
+            <div className="salons-dashboard-card-header">
+              <h4 className="salons-dashboard-card-title">{salon.nombre}</h4>
+              <div className="salons-dashboard-card-actions">
+                <button
+                  type="button"
+                  className="salons-dashboard-card-action"
+                  aria-label="Editar salón"
+                  onClick={() => abrirFormularioEdicion(salon)}
+                >
+                  <FaEdit />
+                </button>
+                <button
+                  type="button"
+                  className="salons-dashboard-card-action"
+                  aria-label="Eliminar salón"
+                  onClick={() => handleEliminarSalon(salon.id)}
+                >
+                  <FaTrash />
+                </button>
+              </div>
+            </div>
+            <div className="salons-dashboard-card-details">
+              <p className="salons-dashboard-card-detail">
+                📍 <strong>{salon.localizacion}</strong>
+              </p>
+              <p className="salons-dashboard-card-detail">
+                Capacidad: <strong>{salon.mincapacidad} - {salon.maxcapacidad}</strong> personas
+              </p>
+              <p className="salons-dashboard-card-detail">
+                Estado:{" "}
+                <span
+                  className="salons-dashboard-status"
+                  style={{
+                    color: salon.estado ? "#4dff4d" : "#ff4d4d",
+                  }}
+                >
+                  {salon.estado ? "Activo" : "Inactivo"}
+                </span>
+              </p>
+            </div>
+          </div>
+        ))}
+      </Grid>
+
+      {!cargando && salonesFiltrados.filter(s => s.estado === 0).length === 0 && (
+        <p className="salons-dashboard-no-results">
+          No se encontraron salones inactivos.
         </p>
       )}
     </div>

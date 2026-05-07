@@ -6,8 +6,8 @@ interface Props {
 
 export default function SalonsStats({ salons }: Props) {
   const total = salons.length;
-  const activos = salons.filter((s) => s.estado === true).length;
-  const inactivos = salons.filter((s) => s.estado === false).length;
+  const activos = salons.filter((s) => s.estado === 1).length;
+  const inactivos = salons.filter((s) => s.estado === 0).length;
 
   return (
     <div className="salons-stats">

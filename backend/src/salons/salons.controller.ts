@@ -1,10 +1,12 @@
-import { Controller, Get, Body, Post, Patch, Delete, Param, Req, UseGuards } from '@nestjs/common';
+import { Controller, Get, Body, Post, Patch, Delete, Param, Req, UseGuards, UseInterceptors, ClassSerializerInterceptor } from '@nestjs/common';
 import { SalonsService } from './salons.service';
 import { JwtAuthGuard } from '../auth/jwt_auth_guard';
 import { CreateSalonsDto } from '../dto/create_salons_dto';
 import { UpdateSalonsDto } from '../dto/update_salons_dto';
+import { SalonResponseDto } from '../dto/salon_response_dto';
 
 @UseGuards(JwtAuthGuard)
+@UseInterceptors(ClassSerializerInterceptor)
 @Controller('salons')
 export class SalonsController {
   constructor(private readonly salonsService: SalonsService) {}

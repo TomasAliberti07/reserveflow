@@ -105,7 +105,7 @@ export default function EventsDashboard() {
         />
       </div>
 
-      {/* Placeholder para mapear `filteredEvents` (se implementará la grilla en el siguiente paso) */}
+   
       <div className="events-dashboard-results" aria-live="polite">
         {/* mapped results will go here */}
       </div>

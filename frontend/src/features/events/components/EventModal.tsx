@@ -1,10 +1,12 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Popup from '../../../components/ui/popup';
 import EventForm from './EventForm';
 import { createEvent } from '../../../api/events.api';
+import { getMenus } from '../../../api/menus.api'; 
+import { getBebidas } from '../../../api/bebida.api'; 
 import type { SalonsDTO } from '../../../api/salons.api';
 import type { EventoDTO } from '../../../api/events.api';
-import '../../../styles/bebidadashboard.css';
+
 
 type Props = {
   isOpen: boolean;
@@ -19,6 +21,28 @@ export default function EventModal({ isOpen, onClose, salons, onEventCreated }: 
   const [popupTitle, setPopupTitle] = useState<string | undefined>(undefined);
   const [popupType, setPopupType] = useState<'success' | 'error' | 'info'>('info');
   const [submitting, setSubmitting] = useState(false);
+  const [menus, setMenus] = useState<any[]>([]);
+  const [bebidas, setBebidas] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (isOpen) {
+      getMenus()
+        .then((res: any) => {
+          setMenus(res.data || res);
+        })
+        .catch((err) => {
+          console.error('Error al cargar menús en el modal:', err);
+        });
+
+      getBebidas()
+        .then((res: any) => {
+          setBebidas(res.data || res);
+        })
+        .catch((err) => {
+          console.error('Error al cargar bebidas en el modal:', err);
+        });
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -33,14 +57,12 @@ export default function EventModal({ isOpen, onClose, salons, onEventCreated }: 
       setPopupType('success');
       setPopupOpen(true);
 
-      // Refrescar lista en el padre
       try {
         onEventCreated();
       } catch (err) {
         // ignore
       }
 
-      // Cerrar modal después de un breve lapso para permitir ver el popup
       setTimeout(() => {
         onClose();
       }, 600);
@@ -63,7 +85,12 @@ export default function EventModal({ isOpen, onClose, salons, onEventCreated }: 
         <div className="bebida-agregar-card">
           <h2 className="bebida-agregar-title">Nueva Reserva</h2>
 
-          <EventForm salons={salons} onSubmit={handleSubmit} />
+          <EventForm 
+            salons={salons} 
+            menus={menus} 
+            bebidas={bebidas} 
+            onSubmit={handleSubmit} 
+          />
 
           <div style={{ marginTop: 12, display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
             <button type="button" className="bebida-cancel-button" onClick={onClose} disabled={submitting}>

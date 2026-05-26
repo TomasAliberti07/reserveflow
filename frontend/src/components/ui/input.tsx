@@ -1,12 +1,12 @@
 import '../../styles/input.css';
 import type { ChangeEvent } from "react";
 
-export interface InputProps {
+export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   name?: string;
   type?: string;
   placeholder?: string;
-  value?: string| number;
+  value?: string | number;
   maxLength?: number;
   onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
   error?: boolean;
@@ -33,7 +33,7 @@ export function Input({
         value={value}
         onChange={onChange}
         className={error ? "input-field-error" : ""}
-        {...props}
+        {...props} 
       />
       {error && errorMessage && <span className="input-error">{errorMessage}</span>}
     </div>

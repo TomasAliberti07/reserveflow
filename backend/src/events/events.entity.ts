@@ -6,8 +6,11 @@ import {
   JoinColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToMany,
 } from 'typeorm';
 import { Salones } from '../salons/salons.entity';
+import { Eventomenus } from './eventomenus.entity';
+import { Eventobebida } from './eventobebida.entity';
 
 @Entity('evento')
 export class Event {
@@ -44,6 +47,12 @@ export class Event {
 
   @Column({ type: 'text', nullable: true })
   notas?: string;
+
+@OneToMany(() => Eventomenus, (eventomenu) => eventomenu.evento)
+eventomenus!: Eventomenus[];
+
+@OneToMany(() => Eventobebida, (eventobebida) => eventobebida.evento)
+eventobebidas!: Eventobebida[];
 
   @CreateDateColumn({ name: 'creado' })
   creado!: Date;

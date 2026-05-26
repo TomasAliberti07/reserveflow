@@ -1,9 +1,11 @@
-import { Injectable, BadRequestException, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Event } from './events.entity';
 import { Salones } from '../salons/salons.entity';
-import { CreateEventDto } from '../dto/create_events_dto';
+import { Eventomenus } from './eventomenus.entity';
+import { Eventobebida } from './eventobebida.entity';
+import { CreateEventDto, EventEstado } from '../dto/create_events_dto';
 import { UpdateEventDto } from '../dto/update_events_dto';
 
 @Injectable()
@@ -14,10 +16,20 @@ export class EventsService {
 
     @InjectRepository(Salones)
     private salonRepository: Repository<Salones>,
+
+    // Inyectamos los dos repositorios de las tablas relacionales intermedias
+    @InjectRepository(Eventomenus)
+    private eventomenusRepository: Repository<Eventomenus>,
+
+    @InjectRepository(Eventobebida)
+    private eventobebidaRepository: Repository<Eventobebida>,
   ) {}
 
   async findAll() {
-    return this.eventRepository.find({ relations: ['salon'] });
+    // Agregamos las relaciones para que cuando listemos los eventos traiga su menú y bebidas
+    return this.eventRepository.find({ 
+      relations: ['salon', 'eventomenus', 'eventomenus.menu', 'eventobebidas', 'eventobebidas.bebida'] 
+    });
   }
 
   async create(createEventDto: CreateEventDto, userId: number) {
@@ -51,14 +63,19 @@ export class EventsService {
       );
     }
 
-    if (
-      !createEventDto.cant_invitados ||
-      createEventDto.cant_invitados < salon.mincapacidad ||
-      createEventDto.cant_invitados > salon.maxcapacidad
-    ) {
-      throw new BadRequestException(
-        'Cantidad de invitados fuera del rango permitido',
-      );
+    // MODIFICACIÓN: Si el estado es PENDIENTE y no mandan invitados (o mandan 0), se saltea la validación de rango
+    const esPendienteVacio = createEventDto.estado === EventEstado.PENDIENTE && (!createEventDto.cant_invitados || createEventDto.cant_invitados === 0);
+    
+    if (!esPendienteVacio) {
+      if (
+        !createEventDto.cant_invitados ||
+        createEventDto.cant_invitados < salon.mincapacidad ||
+        createEventDto.cant_invitados > salon.maxcapacidad
+      ) {
+        throw new BadRequestException(
+          'Cantidad de invitados fuera del rango permitido',
+        );
+      }
     }
 
     if (
@@ -71,12 +88,13 @@ export class EventsService {
       );
     }
 
+    // 1. Creamos y guardamos primero el evento base
     const newEvent = this.eventRepository.create({
       cliente_nombre: createEventDto.cliente_nombre,
       cliente_apellido: createEventDto.cliente_apellido,
       cliente_email: createEventDto.cliente_email,
       cliente_numero: createEventDto.cliente_numero,
-      cant_invitados: createEventDto.cant_invitados,
+      cant_invitados: createEventDto.cant_invitados || 0,
       comienzo: createEventDto.comienzo,
       finaliza: createEventDto.finaliza,
       estado: createEventDto.estado,
@@ -84,7 +102,35 @@ export class EventsService {
       salon: { id: createEventDto.salon_id } as any,
     });
 
-    return this.eventRepository.save(newEvent);
+    const savedEvent = await this.eventRepository.save(newEvent);
+
+    // 2. Si mandaron un menú asignado, lo guardamos en la tabla intermedia
+    if (createEventDto.menu_id) {
+      const nuevoMenuAsignado = this.eventomenusRepository.create({
+        evento_id: savedEvent.id,
+        menu_id: createEventDto.menu_id,
+        cantidad: createEventDto.menu_cantidad || createEventDto.cant_invitados || 1,
+      });
+      await this.eventomenusRepository.save(nuevoMenuAsignado);
+    }
+
+    // 3. Si mandaron bebidas en la lista, las guardamos en lote en su tabla intermedia
+    if (createEventDto.bebidas && createEventDto.bebidas.length > 0) {
+      const bebidasParaGuardar = createEventDto.bebidas.map((b) => 
+        this.eventobebidaRepository.create({
+          evento_id: savedEvent.id,
+          bebida_id: b.bebida_id,
+          cant: b.cant,
+        })
+      );
+      await this.eventobebidaRepository.save(bebidasParaGuardar);
+    }
+
+    // Devolvemos el evento completo con lo que acabamos de persistir
+    return this.eventRepository.findOne({
+      where: { id: savedEvent.id },
+      relations: ['eventomenus', 'eventobebidas'],
+    });
   }
 
   async update(
@@ -100,12 +146,6 @@ export class EventsService {
     if (!event) {
       throw new NotFoundException('Evento no encontrado');
     }
-
-    // Validación: solo el usuario que creó el evento puede actualizarlo
-    // Si no tienes relación con user, comenta esta validación o implementa según tu estructura
-    // if (event.user?.id !== userId) {
-    //   throw new ForbiddenException('No tienes permiso para actualizar este evento');
-    // }
 
     // Si se actualiza el salón, validar disponibilidad
     if (updateEventDto.salon_id && updateEventDto.salon_id !== event.salon.id) {
@@ -141,8 +181,12 @@ export class EventsService {
       }
     }
 
-    // Validar capacidad si se actualiza la cantidad de invitados
-    if (updateEventDto.cant_invitados) {
+    // MODIFICACIÓN: Contemplar la regla de salteo en update si cambia de estado o se mantiene pendiente
+    const estadoActual = updateEventDto.estado || event.estado;
+    const invitadosActuales = updateEventDto.cant_invitados !== undefined ? updateEventDto.cant_invitados : event.cant_invitados;
+    const esPendienteVacioUpdate = estadoActual === 'pendiente' && (invitadosActuales === 0 || !invitadosActuales);
+
+    if (updateEventDto.cant_invitados && !esPendienteVacioUpdate) {
       const salonToValidate = updateEventDto.salon_id
         ? await this.salonRepository.findOne({
             where: { id: updateEventDto.salon_id },
@@ -195,12 +239,6 @@ export class EventsService {
     if (!event) {
       throw new NotFoundException('Evento no encontrado');
     }
-
-    // Validación: solo el usuario que creó el evento puede eliminarlo
-    // Si no tienes relación con user, comenta esta validación o implementa según tu estructura
-    // if (event.user?.id !== userId) {
-    //   throw new ForbiddenException('No tienes permiso para eliminar este evento');
-    // }
 
     return this.eventRepository.remove(event);
   }

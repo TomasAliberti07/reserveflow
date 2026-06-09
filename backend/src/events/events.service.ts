@@ -27,9 +27,26 @@ export class EventsService {
 
   async findAll() {
     // Agregamos las relaciones para que cuando listemos los eventos traiga su menú y bebidas
-    return this.eventRepository.find({ 
+    const events = await this.eventRepository.find({ 
       relations: ['salon', 'eventomenus', 'eventomenus.menu', 'eventobebidas', 'eventobebidas.bebida'] 
     });
+
+    const now = new Date();
+    const eventsToCancel = events.filter(
+      (event) => event.estado === 'pendiente' && event.finaliza && new Date(event.finaliza) < now,
+    );
+
+    if (eventsToCancel.length > 0) {
+      const updatedEvents = await Promise.all(
+        eventsToCancel.map(async (event) => {
+          event.estado = 'cancelado';
+          return this.eventRepository.save(event);
+        }),
+      );
+      return events.map((event) => updatedEvents.find((updated) => updated.id === event.id) ?? event);
+    }
+
+    return events;
   }
 
   async create(createEventDto: CreateEventDto, userId: number) {
@@ -39,6 +56,11 @@ export class EventsService {
 
     if (!salon || !salon.estado) {
       throw new BadRequestException('Salón no disponible');
+    }
+
+    const comienzoFecha = new Date(createEventDto.comienzo);
+    if (createEventDto.comienzo && comienzoFecha < new Date()) {
+      throw new BadRequestException('No se puede cargar un evento con fecha anterior');
     }
 
     // Validación de horarios
@@ -88,7 +110,7 @@ export class EventsService {
       );
     }
 
-    // 1. Creamos y guardamos primero el evento base
+    // 1. Creamos el objeto asignando explícitamente el users_id que agregamos a la entidad
     const newEvent = this.eventRepository.create({
       cliente_nombre: createEventDto.cliente_nombre,
       cliente_apellido: createEventDto.cliente_apellido,
@@ -99,19 +121,22 @@ export class EventsService {
       finaliza: createEventDto.finaliza,
       estado: createEventDto.estado,
       notas: createEventDto.notas,
-      salon: { id: createEventDto.salon_id } as any,
+      salon_id: createEventDto.salon_id,
+      users_id: userId, // 🚀 CORREGIDO: Mapeo de columna nativa directa
     });
 
     const savedEvent = await this.eventRepository.save(newEvent);
 
-    // 2. Si mandaron un menú asignado, lo guardamos en la tabla intermedia
-    if (createEventDto.menu_id) {
-      const nuevoMenuAsignado = this.eventomenusRepository.create({
-        evento_id: savedEvent.id,
-        menu_id: createEventDto.menu_id,
-        cantidad: createEventDto.menu_cantidad || createEventDto.cant_invitados || 1,
-      });
-      await this.eventomenusRepository.save(nuevoMenuAsignado);
+    // 2. Procesamos el array 'menus' de múltiples opciones, mapeando con la entidad intermedia
+    if (createEventDto.menus && createEventDto.menus.length > 0) {
+      const menusParaGuardar = createEventDto.menus.map((m) => 
+        this.eventomenusRepository.create({
+          evento_id: savedEvent.id,
+          menu_id: m.menu_id,
+          cantidad: m.cant || createEventDto.cant_invitados || 1,
+        })
+      );
+      await this.eventomenusRepository.save(menusParaGuardar);
     }
 
     // 3. Si mandaron bebidas en la lista, las guardamos en lote en su tabla intermedia
@@ -126,7 +151,7 @@ export class EventsService {
       await this.eventobebidaRepository.save(bebidasParaGuardar);
     }
 
-    // Devolvemos el evento completo con lo que acabamos de persistir
+    // Devolvemos el evento completo con lo que acabamos de persistir de forma consistente
     return this.eventRepository.findOne({
       where: { id: savedEvent.id },
       relations: ['eventomenus', 'eventobebidas'],
@@ -214,6 +239,10 @@ export class EventsService {
     ) {
       const comienzo = new Date(updateEventDto.comienzo || event.comienzo);
       const finaliza = new Date(updateEventDto.finaliza || event.finaliza);
+
+      if (updateEventDto.comienzo && comienzo < new Date()) {
+        throw new BadRequestException('No se puede actualizar un evento hacia una fecha anterior');
+      }
 
       if (comienzo >= finaliza) {
         throw new BadRequestException(

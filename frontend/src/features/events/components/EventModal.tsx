@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import Popup from '../../../components/ui/popup';
 import EventForm from './EventForm';
-import { createEvent } from '../../../api/events.api';
+import { createEvent, updateEvent } from '../../../api/events.api';
 import { getMenus } from '../../../api/menus.api'; 
 import { getBebidas } from '../../../api/bebida.api'; 
 import type { SalonsDTO } from '../../../api/salons.api';
@@ -13,9 +13,10 @@ type Props = {
   onClose: () => void;
   salons: SalonsDTO[];
   onEventCreated: () => void;
+  initialData?: EventoDTO;
 };
 
-export default function EventModal({ isOpen, onClose, salons, onEventCreated }: Props) {
+export default function EventModal({ isOpen, onClose, salons, onEventCreated, initialData }: Props) {
   const [popupOpen, setPopupOpen] = useState(false);
   const [popupMessage, setPopupMessage] = useState('');
   const [popupTitle, setPopupTitle] = useState<string | undefined>(undefined);
@@ -51,9 +52,16 @@ export default function EventModal({ isOpen, onClose, salons, onEventCreated }: 
   const handleSubmit = async (data: EventoDTO) => {
     setSubmitting(true);
     try {
-      await createEvent(data);
-      setPopupTitle('Reserva creada');
-      setPopupMessage('La reserva se creó correctamente.');
+      if (initialData?.id) {
+        await updateEvent(initialData.id, data);
+        setPopupTitle('Reserva actualizada');
+        setPopupMessage('La reserva se actualizó correctamente.');
+      } else {
+        await createEvent(data);
+        setPopupTitle('Reserva creada');
+        setPopupMessage('La reserva se creó correctamente.');
+      }
+
       setPopupType('success');
       setPopupOpen(true);
 
@@ -82,18 +90,26 @@ export default function EventModal({ isOpen, onClose, salons, onEventCreated }: 
       <Popup open={popupOpen} title={popupTitle} message={popupMessage} type={popupType} onClose={handlePopupClose} />
 
       <div className="modal-overlay">
-        <div className="bebida-agregar-card">
-          <h2 className="bebida-agregar-title">Nueva Reserva</h2>
+        <div className="event-modal-card">
+          <h2 className="event-modal-title">
+            {initialData?.id ? 'Editar Reserva' : 'Nueva Reserva'}
+          </h2>
 
-          <EventForm 
-            salons={salons} 
-            menus={menus} 
-            bebidas={bebidas} 
-            onSubmit={handleSubmit} 
-          />
+          <div className="event-modal-body">
+            <EventForm
+              salons={salons}
+              menus={menus}
+              bebidas={bebidas}
+              onSubmit={handleSubmit}
+            />
+          </div>
 
-          <div style={{ marginTop: 12, display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
-            <button type="button" className="bebida-cancel-button" onClick={onClose} disabled={submitting}>
+          <div className="event-modal-footer">
+            <button type="submit" form="event-form" className="event-modal-save-button" disabled={submitting}>
+              Guardar
+            </button>
+
+            <button type="button" className="event-modal-cancel-button" onClick={onClose} disabled={submitting}>
               Cancelar
             </button>
           </div>

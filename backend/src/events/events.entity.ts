@@ -17,9 +17,17 @@ export class Event {
   @PrimaryGeneratedColumn()
   id!: number;
 
+  @Column({ type: 'int' })
+  salon_id!: number;
+
   @ManyToOne(() => Salones)
   @JoinColumn({ name: 'salon_id' })
   salon!: Salones;
+
+  // 🚀 RELACIÓN AGREGADA: Declaramos explícitamente la columna numérica users_id
+  // para que coincida exacto con tu tabla de MySQL y no tire error en el .create()
+  @Column({ type: 'int', name: 'users_id' })
+  users_id!: number;
 
   @Column({ length: 100 })
   cliente_nombre!: string;
@@ -30,10 +38,10 @@ export class Event {
   @Column({ length: 150 })
   cliente_email!: string;
 
-  @Column({ length: 20 })
-  cliente_numero!: string;
+  @Column({ length: 20, nullable: true }) // Permitimos nullable: true en concordancia con el "YES" de tu tabla
+  cliente_numero?: string;
 
-  @Column({ type: 'int' })
+  @Column({ type: 'int', default: 0 }) // Le asignamos el valor por defecto en la entidad tal como tu DB (YES 0)
   cant_invitados!: number;
 
   @Column({ type: 'datetime' })
@@ -42,17 +50,17 @@ export class Event {
   @Column({ type: 'datetime' })
   finaliza!: Date;
 
-  @Column({ length: 50 })
+  @Column({ length: 50, default: 'pendiente' })
   estado!: string; // pendiente | confirmado | cancelado
 
   @Column({ type: 'text', nullable: true })
   notas?: string;
 
-@OneToMany(() => Eventomenus, (eventomenu) => eventomenu.evento)
-eventomenus!: Eventomenus[];
+  @OneToMany(() => Eventomenus, (eventomenu) => eventomenu.evento)
+  eventomenus!: Eventomenus[];
 
-@OneToMany(() => Eventobebida, (eventobebida) => eventobebida.evento)
-eventobebidas!: Eventobebida[];
+  @OneToMany(() => Eventobebida, (eventobebida) => eventobebida.evento)
+  eventobebidas!: Eventobebida[];
 
   @CreateDateColumn({ name: 'creado' })
   creado!: Date;

@@ -5,6 +5,7 @@ interface DateSelectProps {
   value: string;
   onChange: (value: string) => void;
   name?: string;
+  min?: string;
   error?: boolean;
   errorMessage?: string;
 }
@@ -14,6 +15,7 @@ export function DateSelect({
   value, 
   onChange, 
   name,
+  min,
   error = false,
   errorMessage 
 }: DateSelectProps) {
@@ -29,6 +31,7 @@ export function DateSelect({
         name={name}
         type="date"
         value={value}
+        min={min}
         onChange={handleChange}
         className={`date-select ${error ? "input-field-error" : ""}`}
       />

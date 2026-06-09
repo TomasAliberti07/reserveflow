@@ -92,6 +92,23 @@ const emptyFormState: EventFormState = {
   bebidas_seleccionadas: [],
 };
 
+type ValidationErrors = Partial<Record<keyof EventFormState | 'general', string>>;
+
+const getTodayDateString = () => {
+  const today = new Date();
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(today.getDate())}`;
+};
+
+const buildDateTime = (date: string, time: string) => {
+  return new Date(`${date}T${time}:00`);
+};
+
+const formatLocalDateTime = (date: Date) => {
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:00`;
+};
+
 export default function EventForm({ salons, menus, bebidas, onSubmit, initialData }: EventoFormProps) {
   const [formData, setFormData] = useState<EventFormState>(() => ({
     ...emptyFormState,
@@ -102,6 +119,8 @@ export default function EventForm({ salons, menus, bebidas, onSubmit, initialDat
     notas: initialData?.notas ?? '',
     cant_invitados_display: initialData?.cant_invitados ? initialData.cant_invitados : '',
   }));
+  const [errors, setErrors] = useState<ValidationErrors>({});
+  const [minDate] = useState(getTodayDateString());
 
   const [menuIdActual, setMenuIdActual] = useState<number>(0);
   const [cantMenuActual, setCantMenuActual] = useState<number>(1);
@@ -189,11 +208,80 @@ export default function EventForm({ salons, menus, bebidas, onSubmit, initialDat
     }));
   };
 
+  const validateForm = () => {
+    const newErrors: ValidationErrors = {};
+    const email = formData.cliente_email.trim();
+    const phone = formData.cliente_numero.trim();
+    const inicioValido = Boolean(formData.fecha_evento && formData.hora_inicio);
+    const finValido = Boolean(formData.fecha_evento && formData.hora_fin);
+    const comienzo = inicioValido ? buildDateTime(formData.fecha_evento, formData.hora_inicio) : null;
+    const finaliza = finValido ? buildDateTime(formData.fecha_evento, formData.hora_fin) : null;
+    const ahora = new Date();
+
+    if (!formData.salon_id || formData.salon_id === 0) {
+      newErrors.salon_id = 'Seleccione un salón';
+    }
+    if (!formData.cliente_nombre.trim()) {
+      newErrors.cliente_nombre = 'Nombre es obligatorio';
+    }
+    if (!formData.cliente_apellido.trim()) {
+      newErrors.cliente_apellido = 'Apellido es obligatorio';
+    }
+    if (!email) {
+      newErrors.cliente_email = 'Email es obligatorio';
+    } else if (!/^\S+@\S+\.\S+$/.test(email)) {
+      newErrors.cliente_email = 'Ingrese un email válido';
+    }
+    if (!phone) {
+      newErrors.cliente_numero = 'Teléfono es obligatorio';
+    } else if (!/^[0-9+()\- ]{7,20}$/.test(phone)) {
+      newErrors.cliente_numero = 'Ingrese un teléfono válido';
+    }
+    if (formData.cant_invitados_display !== '' && Number(formData.cant_invitados_display) < 0) {
+      newErrors.cant_invitados_display = 'La cantidad de invitados debe ser mayor o igual a 0';
+    }
+    if (!formData.fecha_evento) {
+      newErrors.fecha_evento = 'Seleccione la fecha del evento';
+    } else if (buildDateTime(formData.fecha_evento, '00:00') < buildDateTime(minDate, '00:00')) {
+      newErrors.fecha_evento = 'No se puede cargar un evento con fecha anterior';
+    }
+    if (!formData.hora_inicio) {
+      newErrors.hora_inicio = 'Seleccione la hora de inicio';
+    }
+    if (!formData.hora_fin) {
+      newErrors.hora_fin = 'Seleccione la hora de finalización';
+    }
+    if (comienzo && comienzo < ahora) {
+      newErrors.fecha_evento = 'La fecha y hora de inicio no pueden ser anteriores al momento actual';
+    }
+    if (comienzo && finaliza) {
+      const finalTime = finaliza <= comienzo ? new Date(finaliza.getTime() + 24 * 60 * 60 * 1000) : finaliza;
+      if (finalTime <= comienzo) {
+        newErrors.hora_fin = 'La hora de fin debe ser posterior a la hora de inicio';
+      }
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const comienzo = formData.fecha_evento && formData.hora_inicio ? `${formData.fecha_evento}T${formData.hora_inicio}:00` : '';
-    const finaliza = formData.fecha_evento && formData.hora_fin ? `${formData.fecha_evento}T${formData.hora_fin}:00` : '';
-    
+    if (!validateForm()) {
+      return;
+    }
+
+    const comienzoDate = buildDateTime(formData.fecha_evento, formData.hora_inicio);
+    let finalizaDate = buildDateTime(formData.fecha_evento, formData.hora_fin);
+    if (finalizaDate <= comienzoDate) {
+      finalizaDate = new Date(finalizaDate.getTime() + 24 * 60 * 60 * 1000);
+    }
+
+    if (finalizaDate <= comienzoDate) {
+      setErrors({ general: 'La hora de finalización debe ser posterior a la hora de inicio' });
+      return;
+    }
+
     const submitData: EventoDTO & {
       menus?: Array<{ menu_id: number; cant: number }>;
       bebidas?: Array<{ bebida_id: number; cant: number }>;
@@ -204,8 +292,8 @@ export default function EventForm({ salons, menus, bebidas, onSubmit, initialDat
       cliente_email: formData.cliente_email.trim(),
       cliente_numero: formData.cliente_numero.trim(),
       cant_invitados: formData.cant_invitados_display === '' ? 0 : Number(formData.cant_invitados_display),
-      comienzo,
-      finaliza,
+      comienzo: formatLocalDateTime(comienzoDate),
+      finaliza: formatLocalDateTime(finalizaDate),
       notas: formData.notas?.trim(),
     };
 
@@ -218,214 +306,113 @@ export default function EventForm({ salons, menus, bebidas, onSubmit, initialDat
     onSubmit(submitData);
   };
 
-  const s = {
-    form: {
-      width: '100%',
-      display: 'flex',
-      flexDirection: 'column' as const,
-      gap: '14px',
-    },
-    row3: {
-      display: 'grid',
-      gridTemplateColumns: 'repeat(3, 1fr)',
-      gap: '14px',
-      width: '100%',
-    },
-    row4: {
-      display: 'grid',
-      gridTemplateColumns: '1.2fr 1.2fr 1fr 1fr',
-      gap: '12px',
-      width: '100%',
-    },
-    row2: {
-      display: 'grid',
-      gridTemplateColumns: '1fr 1fr',
-      gap: '16px',
-      width: '100%',
-    },
-    group: {
-      display: 'flex',
-      flexDirection: 'column' as const,
-      gap: '5px',
-      width: '100%',
-    },
-    label: {
-      fontSize: '13px',
-      color: '#cbd5e1',
-      fontWeight: '500',
-    },
-    select: {
-      width: '100%',
-      height: '38px',
-      background: '#252a3c',
-      color: '#fff',
-      border: '1px solid #3f445e',
-      borderRadius: '6px',
-      padding: '0 10px',
-      boxSizing: 'border-box' as const,
-      fontSize: '14px',
-      outline: 'none',
-    },
-    actionRow: {
-      display: 'flex',
-      alignItems: 'flex-end',
-      gap: '10px',
-      width: '100%',
-    },
-    btnMas: {
-      height: '38px',
-      padding: '0 16px',
-      background: '#2563eb',
-      color: '#fff',
-      border: 'none',
-      borderRadius: '6px',
-      cursor: 'pointer',
-      fontWeight: 'bold' as const,
-      fontSize: '16px',
-    },
-    gastroBox: {
-      background: 'rgba(255, 255, 255, 0.02)',
-      border: '1px solid rgba(255, 255, 255, 0.05)',
-      padding: '12px',
-      borderRadius: '8px',
-      display: 'flex',
-      flexDirection: 'column' as const,
-      gap: '10px',
-    },
-    // ESPACIO FIJO PREPARADO (No cambia de tamaño nunca)
-    fixedBadgeContainer: {
-      height: '110px', // Altura fija locked
-      maxHeight: '110px',
-      minHeight: '110px',
-      display: 'flex',
-      flexDirection: 'column' as const,
-      gap: '8px',
-      background: 'rgba(255, 255, 255, 0.01)',
-      border: '1px solid rgba(255, 255, 255, 0.04)',
-      padding: '10px 12px',
-      borderRadius: '8px',
-      width: '100%',
-      overflowY: 'auto' as const, // Scroll local si se llena de items
-    },
-    placeholderText: {
-      color: '#4b5563',
-      fontSize: '13px',
-      fontStyle: 'italic',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      height: '100%',
-      width: '100%',
-    },
-    textarea: {
-      width: '100%',
-      height: '65px',
-      background: '#252a3c',
-      color: '#fff',
-      border: '1px solid #3f445e',
-      borderRadius: '6px',
-      padding: '8px',
-      boxSizing: 'border-box' as const,
-      fontSize: '14px',
-      resize: 'none' as const,
-      outline: 'none',
-    },
-    footer: {
-      display: 'flex',
-      justifyContent: 'flex-end',
-      width: '100%',
-      marginTop: '4px',
-    },
-    btnGuardar: {
-      height: '38px',
-      padding: '0 32px',
-      background: '#2563eb',
-      color: '#fff',
-      border: 'none',
-      borderRadius: '6px',
-      fontWeight: '500' as const,
-      cursor: 'pointer',
-    },
-  };
 
   const tieneItemsAgregados = formData.menus_seleccionados.length > 0 || formData.bebidas_seleccionadas.length > 0;
 
   return (
-    <form onSubmit={handleSubmit} style={s.form}>
-      <div style={s.row3}>
+    <form id="event-form" onSubmit={handleSubmit} className="event-form event-form-root">
+      {errors.general ? <div className="form-error">{errors.general}</div> : null}
+      <div className="event-form-row3">
+        <Input label="Nombre" name="cliente_nombre" type="text" value={formData.cliente_nombre} placeholder="Nombre" onChange={handleInputChange} />
+        <Input label="Apellido" name="cliente_apellido" type="text" value={formData.cliente_apellido} placeholder="Apellido" onChange={handleInputChange} />
+      </div>
+
+      <div className="event-form-row3">
         <Input label="Email" name="cliente_email" type="email" value={formData.cliente_email} onChange={handleInputChange} />
         <Input label="Teléfono" name="cliente_numero" type="tel" value={formData.cliente_numero} onChange={handleInputChange} />
         <Input label="Cantidad de invitados" name="cant_invitados_display" type="number" value={formData.cant_invitados_display} placeholder="0" onChange={handleInputChange} />
       </div>
 
-      <div style={s.row4}>
-        <div style={s.group}>
-          <label style={s.label} htmlFor="salon_id">Salón</label>
-          <select id="salon_id" name="salon_id" style={s.select} value={formData.salon_id} onChange={handleInputChange}>
+      <div className="event-form-row4">
+        <div className="event-form-group">
+          <label className="event-form-label" htmlFor="salon_id">Salón</label>
+          <select id="salon_id" name="salon_id" className="event-form-select" value={formData.salon_id} onChange={handleInputChange}>
             <option value={0}>Seleccione un salón</option>
             {salons?.map((s) => (<option key={s.id} value={s.id ?? 0}>{s.nombre}</option>))}
           </select>
         </div>
 
-        <div style={s.group}>
-          <DateSelect label="Fecha del evento" name="fecha_evento" value={formData.fecha_evento} onChange={(value) => handleChange('fecha_evento', value)} />
+        <div className="event-form-group">
+          <DateSelect
+            label="Fecha del evento"
+            name="fecha_evento"
+            value={formData.fecha_evento}
+            min={minDate}
+            onChange={(value) => handleChange('fecha_evento', value)}
+            error={Boolean(errors.fecha_evento)}
+            errorMessage={errors.fecha_evento}
+          />
         </div>
 
-        <div style={s.group}>
-          <TimeSelect label="Hora de inicio" name="hora_inicio" value={formData.hora_inicio} onChange={(value) => handleChange('hora_inicio', value)} />
+        <div className="event-form-group">
+          <TimeSelect
+            label="Hora de inicio"
+            name="hora_inicio"
+            value={formData.hora_inicio}
+            onChange={(value) => handleChange('hora_inicio', value)}
+            error={Boolean(errors.hora_inicio)}
+            errorMessage={errors.hora_inicio}
+          />
         </div>
 
-        <div style={s.group}>
-          <TimeSelect label="Hora de finalización" name="hora_fin" value={formData.hora_fin} onChange={(value) => handleChange('hora_fin', value)} />
+        <div className="event-form-group">
+          <TimeSelect
+            label="Hora de finalización"
+            name="hora_fin"
+            value={formData.hora_fin}
+            onChange={(value) => handleChange('hora_fin', value)}
+            error={Boolean(errors.hora_fin)}
+            errorMessage={errors.hora_fin}
+          />
         </div>
       </div>
 
-      <div style={s.row2}>
+      <div className="event-form-row2">
         {/* BLOQUE DE MENÚ */}
-        <div style={s.gastroBox}>
-          <div style={s.group}>
-            <label style={s.label} htmlFor="menu_id">Menú</label>
-            <select id="menu_id" style={s.select} value={menuIdActual} onChange={(e) => setMenuIdActual(Number(e.target.value))}>
+        <div className="event-form-gastro-box">
+          <div className="event-form-group">
+            <label className="event-form-label" htmlFor="menu_id">Menú</label>
+            <select id="menu_id" className="event-form-select" value={menuIdActual} onChange={(e) => setMenuIdActual(Number(e.target.value))}>
               <option value={0}>Seleccione un menú</option>
               {menus?.map((m) => (<option key={m.id} value={m.id}>{m.nombre}</option>))}
             </select>
           </div>
-          <div style={s.actionRow}>
-            <div style={{ flex: 1 }}>
+          <div className="event-form-action-row">
+            <div className="event-form-flex-grow">
               <Input label="Cantidad de menús" name="menu_cantidad_input" type="number" min={1} value={cantMenuActual} onChange={(e) => setCantMenuActual(Number(e.target.value))} />
             </div>
-            <button type="button" style={s.btnMas} onClick={handleAgregarMenu}>+</button>
+            <button type="button" className="event-form-btn-add" onClick={handleAgregarMenu}>+</button>
           </div>
         </div>
 
         {/* BLOQUE DE BEBIDA */}
-        <div style={s.gastroBox}>
-          <div style={s.group}>
-            <label style={s.label} htmlFor="bebida_id">Bebida</label>
-            <select id="bebida_id" style={s.select} value={bebidaIdActual} onChange={(e) => setBebidaIdActual(Number(e.target.value))}>
+        <div className="event-form-gastro-box">
+          <div className="event-form-group">
+            <label className="event-form-label" htmlFor="bebida_id">Bebida</label>
+            <select id="bebida_id" className="event-form-select" value={bebidaIdActual} onChange={(e) => setBebidaIdActual(Number(e.target.value))}>
               <option value={0}>Seleccione una bebida</option>
               {bebidas?.map((b) => (<option key={b.id} value={b.id}>{b.nombre}</option>))}
             </select>
           </div>
-          <div style={s.actionRow}>
-            <div style={{ flex: 1 }}>
+          <div className="event-form-action-row">
+            <div className="event-form-flex-grow">
               <Input label="Cantidad" name="cant_bebida" type="number" min={1} value={cantBebidaActual} onChange={(e) => setCantBebidaActual(Number(e.target.value))} />
             </div>
-            <button type="button" style={s.btnMas} onClick={handleAgregarBebida}>+</button>
+            <button type="button" className="event-form-btn-add" onClick={handleAgregarBebida}>+</button>
           </div>
         </div>
       </div>
 
       {/* ESPACIO PREPARADO FIJO (No cambia de tamaño, previene saltos) */}
-      <div style={s.fixedBadgeContainer} className="custom-scrollbar">
+      <div className="event-form-fixed-badge-container custom-scrollbar">
         {!tieneItemsAgregados ? (
-          <div style={s.placeholderText}>
+          <div className="event-form-placeholder-text">
             Sin menús ni bebidas seleccionadas para la reserva.
           </div>
         ) : (
           <>
             {formData.menus_seleccionados.length > 0 && (
-              <div className="selected-drinks-block" style={{ width: '100%' }}>
+              <div className="selected-drinks-block">
                 <div className="selected-drinks-title">Menús seleccionados:</div>
                 <div className="selected-drinks-list">
                   {formData.menus_seleccionados.map((menu, index) => (
@@ -439,7 +426,7 @@ export default function EventForm({ salons, menus, bebidas, onSubmit, initialDat
             )}
 
             {formData.bebidas_seleccionadas.length > 0 && (
-              <div className="selected-drinks-block" style={{ width: '100%', marginTop: formData.menus_seleccionados.length > 0 ? '6px' : '0' }}>
+              <div className="selected-drinks-block">
                 <div className="selected-drinks-title">Bebidas seleccionadas:</div>
                 <div className="selected-drinks-list">
                   {formData.bebidas_seleccionadas.map((bebida, index) => (
@@ -455,15 +442,9 @@ export default function EventForm({ salons, menus, bebidas, onSubmit, initialDat
         )}
       </div>
 
-      <div style={s.group}>
-        <label style={s.label} htmlFor="notas">Notas</label>
-        <textarea id="notas" name="notas" style={s.textarea} value={formData.notas ?? ''} onChange={handleInputChange} />
-      </div>
-
-      <div style={s.footer}>
-        <button type="submit" style={s.btnGuardar}>
-          Guardar
-        </button>
+      <div className="event-form-group">
+        <label className="event-form-label" htmlFor="notas">Notas</label>
+        <textarea id="notas" name="notas" className="event-form-notes-textarea" value={formData.notas ?? ''} onChange={handleInputChange} />
       </div>
     </form>
   );

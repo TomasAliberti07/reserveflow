@@ -7,10 +7,19 @@ export enum EventEstado {
   CANCELADO = 'cancelado',
 }
 
-// 1. DTO auxiliar para validar la estructura de cada bebida que viene en el array
+// 1. DTO auxiliar para validar la estructura de cada bebida en el array
 class BebidaSeleccionadaDto {
   @IsNumber()
   bebida_id!: number;
+
+  @IsNumber()
+  cant!: number;
+}
+
+// 2. DTO auxiliar para validar la estructura de cada menú en el array
+class MenuSeleccionadoDto {
+  @IsNumber()
+  menu_id!: number;
 
   @IsNumber()
   cant!: number;
@@ -32,7 +41,6 @@ export class CreateEventDto {
   @IsString()
   cliente_numero!: string;
 
-  // 2. Cambiado a @IsOptional() para bancar el estado pendiente
   @IsNumber()
   @IsOptional()
   cant_invitados?: number;
@@ -44,25 +52,23 @@ export class CreateEventDto {
   finaliza!: string | Date;
 
   @IsEnum(EventEstado)
-  estado!: EventEstado;
+  @IsOptional()
+  estado?: EventEstado;
 
   @IsString()
   @IsOptional()
   notas?: string;
 
-  // 3. Nuevos campos para la relación con menú (Opcionales)
-  @IsNumber()
-  @IsOptional()
-  menu_id?: number;
 
-  @IsNumber()
-  @IsOptional()
-  menu_cantidad?: number;
-
-  // 4. Nuevo campo para el listado de bebidas (Opcional)
   @IsArray()
   @IsOptional()
-  @ValidateNested({ each: true }) // Valida que cada elemento del array cumpla con las reglas de BebidaSeleccionadaDto
-  @Type(() => BebidaSeleccionadaDto) // Transforma el JSON plano al tipo DTO
+  @ValidateNested({ each: true })
+  @Type(() => MenuSeleccionadoDto)
+  menus?: MenuSeleccionadoDto[];
+
+  @IsArray()
+  @IsOptional()
+  @ValidateNested({ each: true })
+  @Type(() => BebidaSeleccionadaDto)
   bebidas?: BebidaSeleccionadaDto[];
 }

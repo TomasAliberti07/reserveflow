@@ -43,7 +43,9 @@ export class EventsService {
           return this.eventRepository.save(event);
         }),
       );
-      return events.map((event) => updatedEvents.find((updated) => updated.id === event.id) ?? event);
+      return events.map(
+        (event) => updatedEvents.find((updated) => updated.id === event.id) ?? event,
+      );
     }
 
     return events;
@@ -269,6 +271,9 @@ export class EventsService {
       throw new NotFoundException('Evento no encontrado');
     }
 
-    return this.eventRepository.remove(event);
+    event.estado = 'cancelado';
+    await this.eventRepository.save(event);
+
+    return { message: 'Evento eliminado correctamente' };
   }
 }

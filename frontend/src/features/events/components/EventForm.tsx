@@ -130,6 +130,18 @@ export default function EventForm({ salons, menus, bebidas, onSubmit, initialDat
 
   useEffect(() => {
     if (initialData) {
+      const initialMenus = ((initialData as any).eventomenus || []).map((item: any) => ({
+        menu_id: item.menu_id ?? item.menu?.id,
+        cant: item.cantidad ?? item.cant ?? 1,
+        nombre: item.menu?.nombre ?? item.nombre ?? 'Menú',
+      })).filter((item: MenuSeleccionado) => item.menu_id);
+
+      const initialBebidas = ((initialData as any).eventobebidas || []).map((item: any) => ({
+        bebida_id: item.bebida_id ?? item.bebida?.id,
+        cant: item.cant ?? item.cantidad ?? 1,
+        nombre: item.bebida?.nombre ?? item.nombre ?? 'Bebida',
+      })).filter((item: BebidaSeleccionada) => item.bebida_id);
+
       setFormData({
         ...emptyFormState,
         ...initialData,
@@ -138,8 +150,8 @@ export default function EventForm({ salons, menus, bebidas, onSubmit, initialDat
         hora_fin: toTimeLocal(initialData.finaliza),
         notas: initialData.notas ?? '',
         cant_invitados_display: initialData.cant_invitados ? initialData.cant_invitados : '',
-        menus_seleccionados: [], 
-        bebidas_seleccionadas: [],
+        menus_seleccionados: initialMenus,
+        bebidas_seleccionadas: initialBebidas,
       });
     }
   }, [initialData]);

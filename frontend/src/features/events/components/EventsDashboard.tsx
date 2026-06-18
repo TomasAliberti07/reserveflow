@@ -5,6 +5,8 @@ import type { EventoDTO } from '../../../api/events.api';
 import { getSalons } from '../../../api/salons.api';
 import type { SalonsDTO } from '../../../api/salons.api';
 import { Button } from '../../../components/ui/button';
+import ValidationPopup from '../../../components/ui/validationPopup';
+import { useValidationPopup } from '../../../hooks/useValidationPopup';
 import AgregarEvento from '../components/agregarevento';
 import '../../../styles/eventsdashboard.css';
 
@@ -15,6 +17,7 @@ export default function EventsDashboard() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedEvent, setSelectedEvent] = useState<EventoDTO | null>(null);
+  const { popup, showSuccess, showError, closePopup } = useValidationPopup();
 
   const loadData = async () => {
     setLoading(true);
@@ -37,9 +40,11 @@ export default function EventsDashboard() {
     if (!id) return;
     try {
       await deleteEvent(id);
-      loadData();
+      await loadData();
+      showSuccess('La reserva se eliminó correctamente.', 'Reserva eliminada');
     } catch (error) {
       console.error('Error eliminando evento:', error);
+      showError('No se pudo eliminar la reserva. Intenta nuevamente.', 'Error');
     }
   };
 
@@ -81,10 +86,22 @@ export default function EventsDashboard() {
 
   const filteredEvents = events.filter((ev) => {
     const q = searchQuery.trim().toLowerCase();
-    if (!q) return true;
+    const status = getEventStatus(ev);
     const nombre = (ev.cliente_nombre || '').toLowerCase();
     const apellido = (ev.cliente_apellido || '').toLowerCase();
-    return nombre.includes(q) || apellido.includes(q) || `${nombre} ${apellido}`.includes(q);
+    const nombreCompleto = `${nombre} ${apellido}`.trim();
+
+    const matchesSearch =
+      !q ||
+      nombre.includes(q) ||
+      apellido.includes(q) ||
+      nombreCompleto.includes(q);
+
+    if (status === 'cancelado') {
+      return matchesSearch && q.length > 0;
+    }
+
+    return matchesSearch;
   });
 
   const formatDate = (value: string) => {
@@ -251,6 +268,8 @@ export default function EventsDashboard() {
           </div>
         )}
       </div>
+
+      <ValidationPopup popup={popup} closePopup={closePopup} />
 
       <AgregarEvento
         isOpen={isModalOpen}

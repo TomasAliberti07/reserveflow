@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
-import Popup from '../../../components/ui/popup';
+import ValidationPopup from '../../../components/ui/validationPopup';
 import EventForm from './EventForm';
 import { createEvent, updateEvent } from '../../../api/events.api';
 import { getMenus } from '../../../api/menus.api'; 
 import { getBebidas } from '../../../api/bebida.api'; 
 import type { SalonsDTO } from '../../../api/salons.api';
 import type { EventoDTO } from '../../../api/events.api';
+import { useValidationPopup } from '../../../hooks/useValidationPopup';
 
 
 type Props = {
@@ -17,13 +18,24 @@ type Props = {
 };
 
 export default function EventModal({ isOpen, onClose, salons, onEventCreated, initialData }: Props) {
-  const [popupOpen, setPopupOpen] = useState(false);
-  const [popupMessage, setPopupMessage] = useState('');
-  const [popupTitle, setPopupTitle] = useState<string | undefined>(undefined);
-  const [popupType, setPopupType] = useState<'success' | 'error' | 'info'>('info');
+  const { popup, showSuccess, showError, closePopup } = useValidationPopup();
   const [submitting, setSubmitting] = useState(false);
   const [menus, setMenus] = useState<any[]>([]);
   const [bebidas, setBebidas] = useState<any[]>([]);
+  const [shouldRefreshOnClose, setShouldRefreshOnClose] = useState(false);
+
+  const handlePopupClose = () => {
+    closePopup();
+    if (shouldRefreshOnClose) {
+      try {
+        onEventCreated();
+      } catch (err) {
+        // ignore
+      }
+      setShouldRefreshOnClose(false);
+    }
+    onClose();
+  };
 
   useEffect(() => {
     if (isOpen) {
@@ -47,39 +59,22 @@ export default function EventModal({ isOpen, onClose, salons, onEventCreated, in
 
   if (!isOpen) return null;
 
-  const handlePopupClose = () => setPopupOpen(false);
-
   const handleSubmit = async (data: EventoDTO) => {
     setSubmitting(true);
     try {
       if (initialData?.id) {
         await updateEvent(initialData.id, data);
-        setPopupTitle('Reserva actualizada');
-        setPopupMessage('La reserva se actualizó correctamente.');
+        showSuccess('La reserva se actualizó correctamente.', 'Reserva actualizada');
       } else {
         await createEvent(data);
-        setPopupTitle('Reserva creada');
-        setPopupMessage('La reserva se creó correctamente.');
+        showSuccess('La reserva se creó correctamente.', 'Reserva creada');
       }
 
-      setPopupType('success');
-      setPopupOpen(true);
-
-      try {
-        onEventCreated();
-      } catch (err) {
-        // ignore
-      }
-
-      setTimeout(() => {
-        onClose();
-      }, 600);
+      setShouldRefreshOnClose(true);
     } catch (error: any) {
+      setShouldRefreshOnClose(false);
       const msg = error?.response?.data?.message || error?.message || 'Error al crear la reserva.';
-      setPopupTitle('Error');
-      setPopupMessage(String(msg));
-      setPopupType('error');
-      setPopupOpen(true);
+      showError(String(msg), 'Error');
     } finally {
       setSubmitting(false);
     }
@@ -87,7 +82,7 @@ export default function EventModal({ isOpen, onClose, salons, onEventCreated, in
 
   return (
     <>
-      <Popup open={popupOpen} title={popupTitle} message={popupMessage} type={popupType} onClose={handlePopupClose} />
+      <ValidationPopup popup={popup} closePopup={handlePopupClose} />
 
       <div className="modal-overlay">
         <div className="event-modal-card">
@@ -101,6 +96,7 @@ export default function EventModal({ isOpen, onClose, salons, onEventCreated, in
               menus={menus}
               bebidas={bebidas}
               onSubmit={handleSubmit}
+              initialData={initialData}
             />
           </div>
 

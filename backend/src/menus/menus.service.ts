@@ -12,7 +12,7 @@ export class MenusService {
     private menusRepository: Repository<Menus>,
   ) {}
 
-  // 1. Crear: Inyectamos el user_id (singular, como en tu DB)
+  // 1. Crear: Inyectamos el user_id e incluimos el proveedor_id si viene en el DTO
   async create(createMenusDto: CreateMenusDto, userId: number): Promise<Menus> {
     const menuData = { ...createMenusDto };
     
@@ -29,18 +29,18 @@ export class MenusService {
     return await this.menusRepository.save(nuevoMenu);
   }
 
- 
   async findAll(userId: number): Promise<Menus[]> {
     return await this.menusRepository.find({
       where: { users_id: userId }, 
+      relations: ['proveedor'], // Trae los datos del proveedor asociado usando LEFT JOIN
       order: { nombre: 'ASC' }
     });
   }
 
- 
   async findOne(id: number, userId: number): Promise<Menus> {
     const menu = await this.menusRepository.findOne({ 
-      where: { id, users_id: userId } 
+      where: { id, users_id: userId },
+      relations: ['proveedor'] // Trae el detalle del proveedor asignado
     });
 
     if (!menu) {
@@ -49,18 +49,20 @@ export class MenusService {
     return menu;
   }
 
-  // 4. Actualizar: Usamos merge + findOne para máxima seguridad
+  // 4. Actualizar: Usamos merge + findOne cuidando el proveedor_id
   async update(id: number, updateMenusDto: UpdateMenusDto, userId: number): Promise<Menus> {
     // Primero aseguramos que el menú le pertenece (reutiliza findOne)
     const menuExistente = await this.findOne(id, userId);
 
+    // Desestructuramos para controlar que proveedor_id no pise datos si viene undefined
+    const { proveedor_id, ...datosAEditar } = updateMenusDto;
+
     const menuEditado = this.menusRepository.merge(menuExistente, {
-      ...updateMenusDto,
-     
+      ...datosAEditar,
       precio: updateMenusDto.precio ? String(updateMenusDto.precio) : undefined,
+      proveedor_id: proveedor_id !== undefined ? proveedor_id : menuExistente.proveedor_id
     });
 
-    
     if (updateMenusDto.categoria && updateMenusDto.categoria !== 'ESPECIAL') {
         menuEditado.dieta_especifica = null;
     }

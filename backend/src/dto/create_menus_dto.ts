@@ -1,4 +1,4 @@
-import { IsString, IsNumber, IsNotEmpty, IsInt, IsOptional, Matches } from 'class-validator';
+import { IsString, IsNumber, IsNotEmpty, IsInt, IsOptional, Matches, Min } from 'class-validator';
 import { Transform } from 'class-transformer';
 
 export class CreateMenusDto {
@@ -36,4 +36,10 @@ export class CreateMenusDto {
   @IsString({ message: 'La dieta especial debe ser texto' })
   @IsOptional()
   dieta_especifica?: string | null;
+
+
+  @IsInt({ message: 'El ID del proveedor debe ser un número entero' })
+  @Min(1, { message: 'El ID del proveedor debe ser un ID válido' })
+  @IsOptional()
+  proveedor_id?: number;
 }

@@ -1,4 +1,4 @@
-import { IsString, IsNumber, IsNotEmpty, IsInt, Min, Matches } from 'class-validator';
+import { IsString, IsNumber, IsNotEmpty, IsInt, Min, Matches, IsOptional } from 'class-validator';
 import { Transform } from 'class-transformer';
 
 export class CreateBebidaDto {
@@ -18,4 +18,10 @@ export class CreateBebidaDto {
   @IsInt({ message: 'El stock debe ser un número entero' })
   @Min(0, { message: 'El stock no puede ser negativo' })
   stock!: number;
+
+
+  @IsInt({ message: 'El ID del proveedor debe ser un número entero' })
+  @Min(1, { message: 'El ID del proveedor debe ser un ID válido' })
+  @IsOptional()
+  proveedor_id?: number;
 }

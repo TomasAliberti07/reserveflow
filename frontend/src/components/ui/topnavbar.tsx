@@ -5,6 +5,7 @@ import {
   FaCocktail,
   FaUtensils,
   FaChair,
+  FaTruck, 
 } from "react-icons/fa";
 import "../../styles/topnavbar.css";
 
@@ -32,6 +33,11 @@ export default function TopNavbar() {
 
         <Link to="/salons" className="navbar-icon" aria-label="Salones">
           <FaChair />
+        </Link>
+
+       
+        <Link to="/proveedores" className="navbar-icon" aria-label="Proveedores">
+          <FaTruck />
         </Link>
       </div>
     </nav>

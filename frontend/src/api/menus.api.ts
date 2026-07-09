@@ -14,6 +14,9 @@ export interface MenusDTO {
   disponible: number;
   createdAt?: string;
   updatedAt?: string;
+  
+ 
+  proveedorId?: number | null; 
 }
 
 const getAuthHeaders = () => {
@@ -28,25 +31,21 @@ const getAuthHeaders = () => {
 // --- PETICIONES ---
 
 export const getMenus = async (): Promise<MenusDTO[]> => {
-  // En GET, el segundo parámetro son las opciones (donde van los headers)
   const response = await axios.get<MenusDTO[]>(`${API_URL}/menus`, getAuthHeaders());
   return response.data;
 };
 
 export const createMenu = async (data: Partial<MenusDTO>): Promise<MenusDTO> => {
-  // En POST, el segundo parámetro es el BODY y el TERCERO son las opciones
   const response = await axios.post<MenusDTO>(`${API_URL}/menus`, data, getAuthHeaders());
   return response.data;
 };
 
 export const updateMenu = async (id: number, data: Partial<MenusDTO>) => {
-  // En PUT, el tercer parámetro son las opciones
   const response = await axios.put(`${API_URL}/menus/${id}`, data, getAuthHeaders());
   return response.data;
 };
 
 export const deleteMenu = async (id: number) => {
-  // En DELETE, el segundo parámetro son las opciones
   const response = await axios.delete(`${API_URL}/menus/${id}`, getAuthHeaders());
   return response.data;
 };

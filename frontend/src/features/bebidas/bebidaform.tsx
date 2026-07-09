@@ -1,63 +1,178 @@
-import { useState } from "react";
-import {Input} from "../../components/ui/input";
-import {Button} from "../../components/ui/button";
+import { useState, useEffect } from "react";
+import { Input } from "../../components/ui/input";
+import { Button } from "../../components/ui/button";
+import ValidationPopup from "../../components/ui/validationPopup";
+import { getProveedores } from "../../api/proveedores.api";
+import type { Proveedor } from "../../api/proveedores.api";
+import { useValidationPopup } from "../../hooks/useValidationPopup";
+import { validateName, validatePositiveNumber, normalizeString } from "../../utils/validations";
 
-interface Props {
+interface BebidaFormProps {
   onSubmit: (bebida: any) => void;
+  onCancel: () => void;
   bebidaInicial?: any;
 }
 
-export default function BebidaForm({ onSubmit, bebidaInicial }: Props) {
-  const [nombre, setNombre] = useState(bebidaInicial?.nombre || "");
-  const [alcohol, setAlcohol] = useState<boolean>(
-    bebidaInicial?.alcohol ?? false
-  );
-  const [precio, setPrecio] = useState(
-    bebidaInicial?.precio || 0
-  );
+export default function BebidaForm({ onSubmit, onCancel, bebidaInicial }: BebidaFormProps) {
+  const [nombre, setNombre] = useState("");
+  const [alcohol, setAlcohol] = useState(false);
+  const [precio, setPrecio] = useState("");
+  
+  // Feature de Stock Dinámico
+  const [tieneStock, setTieneStock] = useState<boolean>(false);
+  const [stock, setStock] = useState("");
 
-  const manejarSubmit = (e: React.FormEvent) => {
+  // Relación con Proveedores
+  const [proveedorId, setProveedorId] = useState<number | string>("");
+  const [proveedores, setProveedores] = useState<Proveedor[]>([]);
+
+  const { popup, fieldError, showError, closePopup } = useValidationPopup();
+
+  // Sincronizar estados si estamos editando
+  useEffect(() => {
+    setNombre(bebidaInicial?.nombre ?? "");
+    setAlcohol(bebidaInicial?.alcohol === 1);
+    setPrecio(bebidaInicial?.precio ?? "");
+    
+    const stockInicial = bebidaInicial?.stock ?? 0;
+    setStock(stockInicial > 0 ? String(stockInicial) : "");
+    setTieneStock(stockInicial > 0);
+    
+    setProveedorId(bebidaInicial?.proveedor_id || "");
+  }, [bebidaInicial]);
+
+  // Cargar proveedores filtrados al montar
+  useEffect(() => {
+    const cargarProveedoresBebida = async () => {
+      try {
+        const todosLosProveedores = await getProveedores();
+        const soloBebidas = todosLosProveedores.filter(p => p.tipo === "BEBIDA");
+        setProveedores(soloBebidas);
+      } catch (error) {
+        console.error("Error obteniendo proveedores para bebidas:", error);
+      }
+    };
+    cargarProveedoresBebida();
+  }, []);
+
+  const manejarSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    const nameValidation = validateName(nombre);
+    if (!nameValidation.isValid) {
+      showError(nameValidation.error || "El nombre no es válido", "Error", "nombre");
+      return;
+    }
+
+    const precioValidation = validatePositiveNumber(precio, "El precio");
+    if (!precioValidation.isValid) {
+      showError(precioValidation.error || "El precio no es válido", "Error", "precio");
+      return;
+    }
+
+    // Validar stock únicamente si el checkbox está activo
+    if (tieneStock) {
+      const stockValidation = validatePositiveNumber(stock, "El stock");
+      if (!stockValidation.isValid) {
+        showError(stockValidation.error || "El stock no es válido", "Error", "stock");
+        return;
+      }
+    }
+
     const bebida = {
-      nombre,
-      alcohol: alcohol ? 1 : 0, 
-      precio: Number(precio)
+      nombre: normalizeString(nombre),
+      alcohol: alcohol ? 1 : 0,
+      precio,
+      stock: tieneStock ? Number(stock) : 0, // Si no tiene stock, manda 0 de una
+      proveedor_id: proveedorId ? Number(proveedorId) : null
     };
 
-    onSubmit(bebida);
+    await onSubmit(bebida);
   };
 
   return (
-    <form onSubmit={manejarSubmit}>
-      <h2>{bebidaInicial ? "Editar Bebida" : "Nueva Bebida"}</h2>
-
-      <Input
-        label="Nombre"
-        type="text"
-        value={nombre}
-        onChange={(e) => setNombre(e.target.value)}
-      />
-
-      <Input
-        label="Precio"
-        type="number"
-        value={precio}
-        onChange={(e) => setPrecio(Number(e.target.value))}
-      />
-
-      <label style={{ display: "flex", gap: "0.5rem", marginTop: "1rem" }}>
-        <input
-          type="checkbox"
-          checked={alcohol}
-          onChange={(e) => setAlcohol(e.target.checked)}
+    <>
+      <ValidationPopup popup={popup} closePopup={closePopup} />
+      <h2 className="bebida-agregar-title">{bebidaInicial ? "Editar Bebida" : "Nueva Bebida"}</h2>
+      
+      <form onSubmit={manejarSubmit} className="bebida-agregar-form">
+        <Input
+          label="Nombre"
+          value={nombre}
+          onChange={(e) => setNombre(e.target.value)}
+          placeholder="Ej: Fernet"
+          error={fieldError?.field === "nombre"}
+          errorMessage={fieldError?.field === "nombre" ? fieldError.message : undefined}
         />
-        Contiene alcohol
-      </label>
 
-      <Button type="submit">
-        Guardar
-      </Button>
-    </form>
+        <Input
+          label="Precio"
+          type="number"
+          value={precio}
+          onChange={(e) => setPrecio(e.target.value)} 
+          placeholder="0.00"
+          error={fieldError?.field === "precio"}
+          errorMessage={fieldError?.field === "precio" ? fieldError.message : undefined}
+        />
+
+        {/* Checkbox Dinámico de Stock */}
+        <label className="bebida-agregar-checkbox" style={{ marginBottom: "0.5rem" }}>
+          <input
+            type="checkbox"
+            checked={tieneStock}
+            onChange={(e) => {
+              setTieneStock(e.target.checked);
+              if (!e.target.checked) setStock(""); // Limpia el estado si se desmarca
+            }}
+          />
+          ¿Esta bebida tiene stock?
+        </label>
+
+        {tieneStock && (
+          <Input
+            label="Stock"
+            type="number"
+            value={stock}
+            onChange={(e) => setStock(e.target.value)} 
+            placeholder="Cantidad disponible"
+            error={fieldError?.field === "stock"}
+            errorMessage={fieldError?.field === "stock" ? fieldError.message : undefined}
+          />
+        )}
+
+        {/* Selector de Proveedor de Bebidas con clases nativas del proyecto */}
+        <div className="form-group" style={{ display: "flex", flexDirection: "column", gap: "0.5rem", marginBottom: "1rem" }}>
+          <label style={{ color: "#94a3b8", fontSize: "0.9rem" }}>Proveedor de Bebida</label>
+          <select
+            className="menu-select"
+            value={proveedorId}
+            onChange={(e) => setProveedorId(e.target.value)}
+          >
+            <option value="">Sin Proveedor asignado</option>
+            {proveedores.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.nombre}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <label className="bebida-agregar-checkbox">
+          <input
+            type="checkbox"
+            checked={alcohol}
+            onChange={(e) => setAlcohol(e.target.checked)}
+          />
+          Contiene alcohol
+        </label>
+
+        <div className="bebida-agregar-actions">
+          <Button type="submit">Guardar</Button>
+          <button type="button" className="bebida-cancel-button" onClick={onCancel}>
+            Cancelar
+          </button>
+        </div>
+      </form>
+    </>
   );
 }

@@ -8,6 +8,7 @@ export interface BebidaDTO {
   alcohol: number;
   precio: string;
   stock: number;
+  proveedor_id?: number | null;
 }
 
 const getAuthHeaders = () => {
@@ -19,30 +20,29 @@ const getAuthHeaders = () => {
   };
 };
 
-// --- PETICIONES ---
+// --- PETICIONES  ---
 
 export const getBebidas = async (): Promise<BebidaDTO[]> => {
-  const response = await axios.get<BebidaDTO[]>(`${API_URL}/bebida`, getAuthHeaders());
+  const response = await axios.get<BebidaDTO[]>(`${API_URL}/bebida`, getAuthHeaders()); // 🔄 Singular
   return response.data;
 };
 
 export const getBebidaById = async (id: number) => {
-  const response = await axios.get(`${API_URL}/bebida/${id}`, getAuthHeaders());
+  const response = await axios.get(`${API_URL}/bebida/${id}`, getAuthHeaders()); // 🔄 Singular
   return response.data;
 };
 
 export const createBebida = async (data: Partial<BebidaDTO>): Promise<BebidaDTO> => {
-  // Recordá: URL, DATA, HEADERS
-  const response = await axios.post<BebidaDTO>(`${API_URL}/bebida`, data, getAuthHeaders());
+  const response = await axios.post<BebidaDTO>(`${API_URL}/bebida`, data, getAuthHeaders()); // 🔄 Singular
   return response.data;
 };
 
 export const updateBebida = async (id: number, data: Partial<BebidaDTO>) => {
-  const response = await axios.put(`${API_URL}/bebida/${id}`, data, getAuthHeaders());
+  const response = await axios.put(`${API_URL}/bebida/${id}`, data, getAuthHeaders()); // 🔄 Singular
   return response.data;
 };
 
 export const deleteBebida = async (id: number) => {
-  const response = await axios.delete(`${API_URL}/bebida/${id}`, getAuthHeaders());
+  const response = await axios.delete(`${API_URL}/bebida/${id}`, getAuthHeaders()); // 🔄 Singular
   return response.data;
 };

@@ -51,7 +51,7 @@ export default function MenuForm({ onSubmit, onCancel, menuInicial }: MenuFormPr
     setDisponible(menuInicial?.disponible === 1);
     setPrecio(menuInicial?.precio ? String(menuInicial.precio) : "");
     setDietaEspecifica(menuInicial?.dieta_especifica ?? "");
-    setProveedorId(menuInicial?.proveedorId || "");
+    setProveedorId(menuInicial?.proveedor_id || "");
   }, [menuInicial]);
 
   // Cargar los proveedores al montar el componente
@@ -98,7 +98,7 @@ export default function MenuForm({ onSubmit, onCancel, menuInicial }: MenuFormPr
       precio: String(precio),
       dieta_especifica: categoria === "Especial" && dietaEspecifica ? dietaEspecifica : null,
       // Se inyecta la relación relacional mandándolo como Number o null
-      proveedorId: proveedorId ? Number(proveedorId) : null
+      proveedor_id: proveedorId ? Number(proveedorId) : null
     };
 
     await onSubmit(menu);

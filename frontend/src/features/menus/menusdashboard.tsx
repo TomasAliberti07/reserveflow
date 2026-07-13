@@ -25,15 +25,6 @@ export default function MenuDashboard() {
   const [popupMessage, setPopupMessage] = useState("");
   const [popupType, setPopupType] = useState<"success" | "error" | "info">("info");
 
-  // Colores para cada tipo de dieta especial
-  const coloresDieta: Record<string, { bg: string; text: string }> = {
-    Celiaco: { bg: "#FFD700", text: "#000" },
-    Diabetico: { bg: "#007AFF", text: "#fff" },
-    Vegano: { bg: "#34C759", text: "#000" },
-    Vegetariano: { bg: "#2E7D32", text: "#fff" },
-  };
-
-  // Cargar menus de la API al montar el componente
   useEffect(() => {
     cargarMenus();
   }, []);
@@ -58,15 +49,11 @@ export default function MenuDashboard() {
       (menu.categoria ?? "").toLowerCase().includes(busqueda.toLowerCase()) ||
       (menu.descripcion ?? "").toLowerCase().includes(busqueda.toLowerCase())
     )
-    .filter((menu) =>
-      categoriaFiltro === "" || menu.categoria === categoriaFiltro
-    )
+    .filter((menu) => categoriaFiltro === "" || menu.categoria === categoriaFiltro)
     .filter((menu) => {
-      // Si no hay filtro de dieta especial o la categoría no es 'Especial', mostrar todos
       if (dietaEspecificaFiltro === "" || categoriaFiltro !== "Especial") {
         return true;
       }
-      // Si hay filtro de dieta especial y la categoría es 'Especial', filtrar por dieta
       return menu.dieta_especifica === dietaEspecificaFiltro;
     });
 
@@ -74,6 +61,17 @@ export default function MenuDashboard() {
     acc[categoria] = menusFiltrados.filter((menu) => menu.categoria === categoria);
     return acc;
   }, {} as Record<string, MenusDTO[]>);
+
+  // Helper para asignar la clase CSS correcta según la dieta
+  const obtenerClaseDieta = (dieta?: string) => {
+    if (!dieta) return "";
+    const normalizada = dieta.toLowerCase();
+    if (normalizada === "celiaco") return "menu-badge-celiaco";
+    if (normalizada === "diabetico") return "menu-badge-diabetico";
+    if (normalizada === "vegano") return "menu-badge-vegano";
+    if (normalizada === "vegetariano") return "menu-badge-vegetariano";
+    return "menu-badge-default";
+  };
 
   const abrirFormularioNuevo = () => {
     setMenuParaEditar(null);
@@ -100,7 +98,7 @@ export default function MenuDashboard() {
   const handleGuardarMenu = async (menuData: Partial<MenusDTO>) => {
     try {
       if (menuParaEditar?.id != null) {
-        const menuActualizado = await updateMenu(menuParaEditar.id, menuData);
+        const menuActualizado = await updateMenu(menuParaEditar.id, menuData); // Se utiliza PATCH internamente tal como definimos previamente
         setMenus((prev) => prev.map((item) => (item.id === menuParaEditar.id ? menuActualizado : item)));
         cerrarFormulario();
         mostrarPopup("Menú actualizado", "Los datos del menú se guardaron correctamente.", "success");
@@ -118,7 +116,6 @@ export default function MenuDashboard() {
 
   const handleEliminarMenu = async (id?: number) => {
     if (id == null) return;
-
     try {
       await deleteMenu(id);
       setMenus((prev) => prev.filter((menu) => menu.id !== id));
@@ -138,7 +135,7 @@ export default function MenuDashboard() {
         </Button>
       </div>
 
-      <Grid cols={1} gap={4} className="menu-dashboard-grid">
+      <Grid cols={1} gap={4} className="menu-dashboard-grid-stats">
         <div>
           <MenusStats menus={menus} />
         </div>
@@ -174,7 +171,6 @@ export default function MenuDashboard() {
           value={categoriaFiltro}
           onChange={(e) => {
             setCategoriaFiltro(e.target.value);
-            // Resetear el filtro de dieta especial cuando cambien la categoría
             setDietaEspecificaFiltro("");
           }}
           className="menu-dashboard-search-select"
@@ -201,7 +197,6 @@ export default function MenuDashboard() {
         </select>
       </div>
 
-      {/* Lista de menus usando Grid para mejor diseño responsivo */}
       <h3 className="menu-dashboard-inventory-title">Menús Disponibles</h3>
       
       {cargando ? (
@@ -212,24 +207,17 @@ export default function MenuDashboard() {
             menusPorCategoria[categoria].length > 0 ? (
               <div key={categoria} className="menu-dashboard-category-group">
                 <h4 className="menu-dashboard-category-title">{categoria}</h4>
-                <Grid cols={3} gap={4}>
+                
+                {/* Contenedor horizontal directo de las tarjetas (Flex) */}
+                <div className="menu-dashboard-grid">
                   {menusPorCategoria[categoria].map((menu) => (
                     <div key={menu.id} className="menu-dashboard-card">
                       <div className="menu-dashboard-card-header">
                         <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
                           <h4 className="menu-dashboard-card-title">{menu.nombre}</h4>
                           {menu.dieta_especifica && (
-                            <span
-                              style={{
-                                display: "inline-block",
-                                backgroundColor: coloresDieta[menu.dieta_especifica]?.bg || "#999",
-                                color: coloresDieta[menu.dieta_especifica]?.text || "#000",
-                                padding: "4px 10px",
-                                borderRadius: "12px",
-                                fontSize: "12px",
-                                fontWeight: "bold",
-                                whiteSpace: "nowrap",
-                              }}
+                            <span 
+                              className={`menu-badge-dieta ${obtenerClaseDieta(menu.dieta_especifica)}`}
                               title={`Dieta: ${menu.dieta_especifica}`}
                             >
                               {menu.dieta_especifica}
@@ -275,7 +263,7 @@ export default function MenuDashboard() {
                       </div>
                     </div>
                   ))}
-                </Grid>
+                </div>
               </div>
             ) : null
           ))}

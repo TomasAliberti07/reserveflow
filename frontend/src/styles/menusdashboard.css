@@ -70,12 +70,26 @@
   font-size: 1.1rem;
 }
 
+/* Contenedor horizontal para las tarjetas */
+.menu-dashboard-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
 .menu-dashboard-card {
   background-color: #222;
   padding: 1rem;
   border-radius: 0.5rem;
   border: 1px solid #444;
   position: relative;
+  
+  /* Ajustes para comportamiento horizontal y responsivo */
+  flex: 1;
+  min-width: 280px;
+  max-width: 360px;
+  box-sizing: border-box;
 }
 
 .menu-dashboard-card-header {
@@ -303,4 +317,41 @@
   .menu-modal-content {
     margin: 1rem;
   }
+}
+
+/* ==========================================================================
+   Dietas Especiales (Clases añadidas desde el TSX externo)
+   ========================================================================== */
+.menu-badge-dieta {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+.menu-badge-celiaco {
+  background-color: #FFD700;
+  color: #000;
+}
+
+.menu-badge-diabetico {
+  background-color: #007AFF;
+  color: #fff;
+}
+
+.menu-badge-vegano {
+  background-color: #34C759;
+  color: #000;
+}
+
+.menu-badge-vegetariano {
+  background-color: #2E7D32;
+  color: #fff;
+}
+
+.menu-badge-default {
+  background-color: #999;
+  color: #000;
 }

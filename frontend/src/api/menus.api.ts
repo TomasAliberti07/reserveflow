@@ -14,9 +14,7 @@ export interface MenusDTO {
   disponible: number;
   createdAt?: string;
   updatedAt?: string;
-  
- 
-  proveedorId?: number | null; 
+  proveedor_id?: number | null; 
 }
 
 const getAuthHeaders = () => {
@@ -41,7 +39,7 @@ export const createMenu = async (data: Partial<MenusDTO>): Promise<MenusDTO> => 
 };
 
 export const updateMenu = async (id: number, data: Partial<MenusDTO>) => {
-  const response = await axios.put(`${API_URL}/menus/${id}`, data, getAuthHeaders());
+  const response = await axios.patch(`${API_URL}/menus/${id}`, data, getAuthHeaders());
   return response.data;
 };
 

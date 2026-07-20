@@ -10,6 +10,7 @@ import { AuthModule } from './auth/auth.module';
 import { BebidaModule } from './bebida/bebida.module';
 import { MenusModule } from './menus/menus.module';
 import { ProveedoresModule } from './proveedores/proveedores.module';
+import { PedidosModule } from './pedidos/pedidos.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { ProveedoresModule } from './proveedores/proveedores.module';
     BebidaModule,
     MenusModule,
     ProveedoresModule,
+    PedidosModule,
   ],
   controllers: [AppController],
   providers: [AppService],

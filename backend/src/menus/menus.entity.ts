@@ -42,7 +42,7 @@ export class Menus {
   @JoinColumn({ name: 'users_id' })
   user!: User;
 
-  // NUEVO: Relación ManyToOne con Proveedor
+  
   @ManyToOne(() => Proveedor, (proveedor) => proveedor.menus, { onDelete: 'SET NULL', nullable: true })
   @JoinColumn({ name: 'proveedor_id' })
   proveedor!: Proveedor | null;

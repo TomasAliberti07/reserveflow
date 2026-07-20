@@ -1,0 +1,79 @@
+.pedidos-container {
+  padding: 10px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.pedidos-form-card {
+  background-color: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  padding: 20px;
+  color: #f8fafc;
+}
+
+.pedidos-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 15px;
+}
+
+.pedidos-form-group label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #94a3b8;
+}
+
+.pedidos-input, .pedidos-select {
+  padding: 10px;
+  background-color: #0f172a;
+  border: 1px solid #334155;
+  border-radius: 6px;
+  color: #fff;
+  font-size: 14px;
+}
+
+.pedidos-input:focus, .pedidos-select:focus {
+  border-color: #4dc3ff;
+  outline: none;
+}
+
+.pedidos-items-section {
+  margin-top: 15px;
+  border-top: 1px solid #334155;
+  padding-top: 15px;
+}
+
+.pedidos-item-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.pedidos-btn-add {
+  background-color: #334155;
+  color: #fff;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.pedidos-btn-add:hover {
+  background-color: #475569;
+}
+
+.pedidos-btn-remove {
+  background-color: #ef4444;
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}

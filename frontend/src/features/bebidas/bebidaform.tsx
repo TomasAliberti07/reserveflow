@@ -18,7 +18,7 @@ export default function BebidaForm({ onSubmit, onCancel, bebidaInicial }: Bebida
   const [alcohol, setAlcohol] = useState(false);
   const [precio, setPrecio] = useState("");
   
-  // Feature de Stock Dinámico
+  // Feature de Stock Dinámico (manejo local en React)
   const [tieneStock, setTieneStock] = useState<boolean>(false);
   const [stock, setStock] = useState("");
 
@@ -28,17 +28,25 @@ export default function BebidaForm({ onSubmit, onCancel, bebidaInicial }: Bebida
 
   const { popup, fieldError, showError, closePopup } = useValidationPopup();
 
+  // Función helper para obtener de forma segura el ID del proveedor según venga de la API
+  const obtenerProveedorIdInical = (bebida: any) => {
+    const idEncontrado = bebida?.proveedor_id ?? bebida?.proveedorId ?? bebida?.proveedor?.id;
+    return idEncontrado ? String(idEncontrado) : "";
+  };
+
   // Sincronizar estados si estamos editando
   useEffect(() => {
     setNombre(bebidaInicial?.nombre ?? "");
     setAlcohol(bebidaInicial?.alcohol === 1);
-    setPrecio(bebidaInicial?.precio ?? "");
+    setPrecio(bebidaInicial?.precio ? String(bebidaInicial.precio) : "");
     
+    // Determinamos si maneja stock evaluando si tiene stock > 0
     const stockInicial = bebidaInicial?.stock ?? 0;
-    setStock(stockInicial > 0 ? String(stockInicial) : "");
     setTieneStock(stockInicial > 0);
+    setStock(stockInicial > 0 ? String(stockInicial) : "");
     
-    setProveedorId(bebidaInicial?.proveedor_id || "");
+    // Asignamos el ID capturado
+    setProveedorId(obtenerProveedorIdInical(bebidaInicial));
   }, [bebidaInicial]);
 
   // Cargar proveedores filtrados al montar
@@ -48,12 +56,17 @@ export default function BebidaForm({ onSubmit, onCancel, bebidaInicial }: Bebida
         const todosLosProveedores = await getProveedores();
         const soloBebidas = todosLosProveedores.filter(p => p.tipo === "BEBIDA");
         setProveedores(soloBebidas);
+
+        // Si re-cargamos proveedores y ya había un objeto a editar, nos aseguramos de setear su valor
+        if (bebidaInicial) {
+          setProveedorId(obtenerProveedorIdInical(bebidaInicial));
+        }
       } catch (error) {
         console.error("Error obteniendo proveedores para bebidas:", error);
       }
     };
     cargarProveedoresBebida();
-  }, []);
+  }, [bebidaInicial]);
 
   const manejarSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -79,12 +92,13 @@ export default function BebidaForm({ onSubmit, onCancel, bebidaInicial }: Bebida
       }
     }
 
+    // Objeto estrictamente alineado con CreateBebidaDto de NestJS
     const bebida = {
       nombre: normalizeString(nombre),
       alcohol: alcohol ? 1 : 0,
-      precio,
-      stock: tieneStock ? Number(stock) : 0, // Si no tiene stock, manda 0 de una
-      proveedor_id: proveedorId ? Number(proveedorId) : null
+      precio: String(precio), // Cumple con @IsString()
+      stock: tieneStock ? Number(stock) : 0, // Cumple con @IsInt() y @Min(0)
+      proveedor_id: proveedorId ? Number(proveedorId) : undefined // undefined para @IsOptional()
     };
 
     await onSubmit(bebida);
@@ -122,7 +136,7 @@ export default function BebidaForm({ onSubmit, onCancel, bebidaInicial }: Bebida
             checked={tieneStock}
             onChange={(e) => {
               setTieneStock(e.target.checked);
-              if (!e.target.checked) setStock(""); // Limpia el estado si se desmarca
+              if (!e.target.checked) setStock(""); // Limpia el estado del input de stock si se desmarca
             }}
           />
           ¿Esta bebida tiene stock?
@@ -140,17 +154,17 @@ export default function BebidaForm({ onSubmit, onCancel, bebidaInicial }: Bebida
           />
         )}
 
-        {/* Selector de Proveedor de Bebidas con clases nativas del proyecto */}
+        {/* Selector de Proveedor de Bebidas */}
         <div className="form-group" style={{ display: "flex", flexDirection: "column", gap: "0.5rem", marginBottom: "1rem" }}>
           <label style={{ color: "#94a3b8", fontSize: "0.9rem" }}>Proveedor de Bebida</label>
           <select
             className="menu-select"
-            value={proveedorId}
+            value={String(proveedorId)}
             onChange={(e) => setProveedorId(e.target.value)}
           >
             <option value="">Sin Proveedor asignado</option>
             {proveedores.map((p) => (
-              <option key={p.id} value={p.id}>
+              <option key={p.id} value={String(p.id)}>
                 {p.nombre}
               </option>
             ))}

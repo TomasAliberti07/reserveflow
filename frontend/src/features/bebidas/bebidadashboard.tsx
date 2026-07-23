@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { FaEdit, FaTrash } from "react-icons/fa";
 import { Button } from "../../components/ui/button";
 import Grid from "../../components/ui/grid";
-
 import BebidaStats from "./bebidastats";
 import AgregarBebida from "./agregarbebida";
 import Popup from "../../components/ui/popup";
@@ -23,7 +22,6 @@ export default function BebidaDashboard() {
   const [popupMessage, setPopupMessage] = useState("");
   const [popupType, setPopupType] = useState<"success" | "error" | "info">("info");
 
-  // Cargar bebidas de la API al montar el componente
   useEffect(() => {
     cargarBebidas();
   }, []);
@@ -141,46 +139,65 @@ export default function BebidaDashboard() {
         />
       </div>
 
-      {/* Lista de bebidas usando Grid en lugar de tabla para mejor diseño responsivo */}
+      {/* Lista de bebidas usando Grid */}
       <h3 className="bebida-dashboard-inventory-title">Inventario</h3>
       
       {cargando ? (
         <p className="bebida-dashboard-no-results">Cargando bebidas...</p>
       ) : (
         <Grid cols={3} gap={4}>
-          {bebidasFiltradas.map((bebida, index) => (
-            <div 
-              key={bebida.id ?? index} 
-              className="bebida-dashboard-card"
-            >
-              <div className="bebida-dashboard-card-header">
-                <h4 className="bebida-dashboard-card-title">{bebida.nombre}</h4>
-                <div className="bebida-dashboard-card-actions">
-                  <button
-                    type="button"
-                    className="bebida-dashboard-card-action"
-                    aria-label="Editar bebida"
-                    onClick={() => abrirFormularioEdicion(bebida)}
-                  >
-                    <FaEdit />
-                  </button>
-                  <button
-                    type="button"
-                    className="bebida-dashboard-card-action"
-                    aria-label="Eliminar bebida"
-                    onClick={() => handleEliminarBebida(bebida.id)}
-                  >
-                    <FaTrash />
-                  </button>
+          {bebidasFiltradas.map((bebida: any, index) => {
+            // Evaluamos si la bebida maneja stock
+            const manejaStock = bebida.tieneStock ?? bebida.manejaStock ?? (bebida.stock > 0);
+
+            return (
+              <div 
+                key={bebida.id ?? index} 
+                className="bebida-dashboard-card"
+              >
+                <div className="bebida-dashboard-card-header">
+                  <h4 className="bebida-dashboard-card-title">{bebida.nombre}</h4>
+                  <div className="bebida-dashboard-card-actions">
+                    <button
+                      type="button"
+                      className="bebida-dashboard-card-action"
+                      aria-label="Editar bebida"
+                      onClick={() => abrirFormularioEdicion(bebida)}
+                    >
+                      <FaEdit />
+                    </button>
+                    <button
+                      type="button"
+                      className="bebida-dashboard-card-action"
+                      aria-label="Eliminar bebida"
+                      onClick={() => handleEliminarBebida(bebida.id)}
+                    >
+                      <FaTrash />
+                    </button>
+                  </div>
+                </div>
+                <div className="bebida-dashboard-card-details">
+                  <p className="bebida-dashboard-card-detail">Precio: <strong>${bebida.precio}</strong></p>
+                  <p className="bebida-dashboard-card-detail">Alcohol: {bebida.alcohol === 1 ? "Sí" : "No"}</p>
+                  <p className="bebida-dashboard-card-detail">
+                    Stock:{" "}
+                    {manejaStock ? (
+                      <span 
+                        className="bebida-dashboard-stock" 
+                        style={{ color: bebida.stock === 0 ? "#ff4d4d" : "#4dff4d" }}
+                      >
+                        {bebida.stock} unidades
+                      </span>
+                    ) : (
+                      <span style={{ color: "#38bdf8", fontWeight: "500" }}>
+                        Solo pedido a proveedor
+                      </span>
+                    )}
+                  </p>
                 </div>
               </div>
-              <div className="bebida-dashboard-card-details">
-                <p className="bebida-dashboard-card-detail">Precio: <strong>${bebida.precio}</strong></p>
-                <p className="bebida-dashboard-card-detail">Alcohol: {bebida.alcohol === 1 ? "Sí" : "No"}</p>
-                <p className="bebida-dashboard-card-detail">Stock: <span className="bebida-dashboard-stock" style={{ color: bebida.stock === 0 ? "#ff4d4d" : "#4dff4d" }}>{bebida.stock} unidades</span></p>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </Grid>
       )}
 

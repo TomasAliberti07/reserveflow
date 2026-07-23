@@ -4,8 +4,18 @@ interface Props {
 
 export default function BebidasStats({ bebidas }: Props) {
   const total = bebidas.length;
-  const sinStock = bebidas.filter(b => b.stock === 0).length;
-  const stockBajo = bebidas.filter(b => b.stock > 0 && b.stock <= 5).length;
+
+
+  const bebidasConStock = bebidas.filter(b => b.tieneStock ?? b.manejaStock ?? (b.stock > 0));
+
+
+  const sinStock = bebidasConStock.filter(b => b.stock === 0).length;
+
+
+  const stockBajo = bebidasConStock.filter(b => b.stock > 0 && b.stock <= 5).length;
+
+
+  const bajoPedido = bebidas.filter(b => !(b.tieneStock ?? b.manejaStock ?? (b.stock > 0))).length;
 
   return (
     <div className="bebida-stats">
@@ -22,6 +32,11 @@ export default function BebidasStats({ bebidas }: Props) {
       <div className="card">
         <h3>Sin Stock</h3>
         <p>{sinStock}</p>
+      </div>
+
+      <div className="card">
+        <h3>Bajo Pedido</h3>
+        <p>{bajoPedido}</p>
       </div>
     </div>
   );

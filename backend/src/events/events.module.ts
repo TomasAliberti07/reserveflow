@@ -6,9 +6,10 @@ import { Event } from './events.entity';
 import { Salones} from '../salons/salons.entity';
 import { Eventomenus } from './eventomenus.entity';
 import { Eventobebida } from './eventobebida.entity';
+import { Bebida } from '../bebida/bebida.entity'; 
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Event, Salones, Eventomenus, Eventobebida])],
+  imports: [TypeOrmModule.forFeature([Event, Salones, Eventomenus, Eventobebida, Bebida])],
   controllers: [EventsController],
   providers: [EventsService],
 })

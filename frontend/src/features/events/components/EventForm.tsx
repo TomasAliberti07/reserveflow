@@ -5,23 +5,17 @@ import { DateSelect } from './DateSelect';
 import { TimeSelect } from './TimeSelect';
 import type { EventoDTO } from '../../../api/events.api';
 import type { SalonsDTO } from '../../../api/salons.api';
+import type { MenusDTO } from '../../../api/menus.api';
+import type { BebidaDTO } from '../../../api/bebida.api';
 import '../../../styles/dateTimeSelect.css';
 
-export interface MenuOptionDTO {
-  id: number;
-  nombre: string;
-  descripcion?: string;
-}
-
-export interface BebidaOptionDTO {
-  id: number;
-  nombre: string;
-}
+export type MenuOptionDTO = MenusDTO;
+export type BebidaOptionDTO = BebidaDTO;
 
 type EventoFormProps = {
   salons: SalonsDTO[];
-  menus: MenuOptionDTO[];
-  bebidas: BebidaOptionDTO[];
+  menus: MenusDTO[];
+  bebidas: BebidaDTO[];
   onSubmit: (data: EventoDTO) => void;
   initialData?: EventoDTO;
 };
@@ -56,6 +50,7 @@ const emptyEvento: EventoDTO = {
   cant_invitados: 0,
   comienzo: '',
   finaliza: '',
+  estado: 'pendiente',
   notas: '',
 };
 
@@ -106,7 +101,12 @@ const buildDateTime = (date: string, time: string) => {
 
 const formatLocalDateTime = (date: Date) => {
   const pad = (n: number) => String(n).padStart(2, '0');
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:00`;
+  const year = date.getFullYear();
+  const month = pad(date.getMonth() + 1);
+  const day = pad(date.getDate());
+  const hours = pad(date.getHours());
+  const minutes = pad(date.getMinutes());
+  return `${year}-${month}-${day}T${hours}:${minutes}:00`;
 };
 
 export default function EventForm({ salons, menus, bebidas, onSubmit, initialData }: EventoFormProps) {
@@ -158,6 +158,9 @@ export default function EventForm({ salons, menus, bebidas, onSubmit, initialDat
 
   const handleChange = (field: keyof EventFormState, value: string | number | null) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+    if (errors[field]) {
+      setErrors((prev) => ({ ...prev, [field]: undefined }));
+    }
   };
 
   const handleInputChange = (
@@ -222,39 +225,34 @@ export default function EventForm({ salons, menus, bebidas, onSubmit, initialDat
 
   const validateForm = () => {
     const newErrors: ValidationErrors = {};
-    const email = formData.cliente_email.trim();
-    const phone = formData.cliente_numero.trim();
+    const email = (formData.cliente_email || '').trim();
+    const phone = (formData.cliente_numero || '').trim();
     const inicioValido = Boolean(formData.fecha_evento && formData.hora_inicio);
     const finValido = Boolean(formData.fecha_evento && formData.hora_fin);
     const comienzo = inicioValido ? buildDateTime(formData.fecha_evento, formData.hora_inicio) : null;
     const finaliza = finValido ? buildDateTime(formData.fecha_evento, formData.hora_fin) : null;
-    const ahora = new Date();
+    const isEditing = Boolean(initialData?.id);
 
+    // OBLIGATORIOS BÁSICOS
     if (!formData.salon_id || formData.salon_id === 0) {
       newErrors.salon_id = 'Seleccione un salón';
     }
     if (!formData.cliente_nombre.trim()) {
-      newErrors.cliente_nombre = 'Nombre es obligatorio';
+      newErrors.cliente_nombre = 'El nombre es obligatorio';
     }
-    if (!formData.cliente_apellido.trim()) {
-      newErrors.cliente_apellido = 'Apellido es obligatorio';
-    }
-    if (!email) {
-      newErrors.cliente_email = 'Email es obligatorio';
-    } else if (!/^\S+@\S+\.\S+$/.test(email)) {
+
+    // OPCIONALES CON VALIDACIÓN DE FORMATO
+    if (email && !/^\S+@\S+\.\S+$/.test(email)) {
       newErrors.cliente_email = 'Ingrese un email válido';
     }
-    if (!phone) {
-      newErrors.cliente_numero = 'Teléfono es obligatorio';
-    } else if (!/^[0-9+()\- ]{7,20}$/.test(phone)) {
+    if (phone && !/^[0-9+()\- ]{7,20}$/.test(phone)) {
       newErrors.cliente_numero = 'Ingrese un teléfono válido';
     }
-    if (formData.cant_invitados_display !== '' && Number(formData.cant_invitados_display) < 0) {
-      newErrors.cant_invitados_display = 'La cantidad de invitados debe ser mayor o igual a 0';
-    }
+
+    // FECHAS Y HORARIOS
     if (!formData.fecha_evento) {
       newErrors.fecha_evento = 'Seleccione la fecha del evento';
-    } else if (buildDateTime(formData.fecha_evento, '00:00') < buildDateTime(minDate, '00:00')) {
+    } else if (!isEditing && buildDateTime(formData.fecha_evento, '00:00') < buildDateTime(minDate, '00:00')) {
       newErrors.fecha_evento = 'No se puede cargar un evento con fecha anterior';
     }
     if (!formData.hora_inicio) {
@@ -263,13 +261,13 @@ export default function EventForm({ salons, menus, bebidas, onSubmit, initialDat
     if (!formData.hora_fin) {
       newErrors.hora_fin = 'Seleccione la hora de finalización';
     }
-    if (comienzo && comienzo < ahora) {
-      newErrors.fecha_evento = 'La fecha y hora de inicio no pueden ser anteriores al momento actual';
-    }
     if (comienzo && finaliza) {
-      const finalTime = finaliza <= comienzo ? new Date(finaliza.getTime() + 24 * 60 * 60 * 1000) : finaliza;
+      let finalTime = finaliza;
+      if (finaliza <= comienzo) {
+        finalTime = new Date(finaliza.getTime() + 24 * 60 * 60 * 1000);
+      }
       if (finalTime <= comienzo) {
-        newErrors.hora_fin = 'La hora de fin debe ser posterior a la hora de inicio';
+        newErrors.hora_fin = 'La hora de fin debe ser posterior a la de inicio';
       }
     }
 
@@ -279,19 +277,14 @@ export default function EventForm({ salons, menus, bebidas, onSubmit, initialDat
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!validateForm()) {
-      return;
-    }
+
+    const isValid = validateForm();
+    if (!isValid) return;
 
     const comienzoDate = buildDateTime(formData.fecha_evento, formData.hora_inicio);
     let finalizaDate = buildDateTime(formData.fecha_evento, formData.hora_fin);
     if (finalizaDate <= comienzoDate) {
       finalizaDate = new Date(finalizaDate.getTime() + 24 * 60 * 60 * 1000);
-    }
-
-    if (finalizaDate <= comienzoDate) {
-      setErrors({ general: 'La hora de finalización debe ser posterior a la hora de inicio' });
-      return;
     }
 
     const submitData: EventoDTO & {
@@ -300,12 +293,13 @@ export default function EventForm({ salons, menus, bebidas, onSubmit, initialDat
     } = {
       salon_id: formData.salon_id,
       cliente_nombre: formData.cliente_nombre.trim(),
-      cliente_apellido: formData.cliente_apellido.trim(),
-      cliente_email: formData.cliente_email.trim(),
-      cliente_numero: formData.cliente_numero.trim(),
+      cliente_apellido: formData.cliente_apellido ? formData.cliente_apellido.trim() : '',
+      cliente_email: formData.cliente_email ? formData.cliente_email.trim() : '',
+      cliente_numero: formData.cliente_numero ? formData.cliente_numero.trim() : '',
       cant_invitados: formData.cant_invitados_display === '' ? 0 : Number(formData.cant_invitados_display),
       comienzo: formatLocalDateTime(comienzoDate),
       finaliza: formatLocalDateTime(finalizaDate),
+      estado: formData.estado ?? 'pendiente',
       notas: formData.notas?.trim(),
     };
 
@@ -315,41 +309,56 @@ export default function EventForm({ salons, menus, bebidas, onSubmit, initialDat
     if (formData.bebidas_seleccionadas.length > 0) {
       submitData.bebidas = formData.bebidas_seleccionadas.map((b) => ({ bebida_id: b.bebida_id, cant: Number(b.cant) }));
     }
+
     onSubmit(submitData);
   };
-
 
   const tieneItemsAgregados = formData.menus_seleccionados.length > 0 || formData.bebidas_seleccionadas.length > 0;
 
   return (
     <form id="event-form" onSubmit={handleSubmit} className="event-form event-form-root">
       {errors.general ? <div className="form-error">{errors.general}</div> : null}
+      
       <div className="event-form-row3">
-        <Input label="Nombre" name="cliente_nombre" type="text" value={formData.cliente_nombre} placeholder="Nombre" onChange={handleInputChange} />
-        <Input label="Apellido" name="cliente_apellido" type="text" value={formData.cliente_apellido} placeholder="Apellido" onChange={handleInputChange} />
+        <div className="event-form-group">
+          <Input label="Nombre *" name="cliente_nombre" type="text" value={formData.cliente_nombre} placeholder="Nombre del cliente" onChange={handleInputChange} />
+          {errors.cliente_nombre && <span className="field-error-text" style={{ color: '#ef4444', fontSize: '0.8rem', marginTop: '4px', display: 'block' }}>{errors.cliente_nombre}</span>}
+        </div>
+        <div className="event-form-group">
+          <Input label="Apellido" name="cliente_apellido" type="text" value={formData.cliente_apellido} placeholder="Apellido (opcional)" onChange={handleInputChange} />
+        </div>
       </div>
 
       <div className="event-form-row3">
-        <Input label="Email" name="cliente_email" type="email" value={formData.cliente_email} onChange={handleInputChange} />
-        <Input label="Teléfono" name="cliente_numero" type="tel" value={formData.cliente_numero} onChange={handleInputChange} />
-        <Input label="Cantidad de invitados" name="cant_invitados_display" type="number" value={formData.cant_invitados_display} placeholder="0" onChange={handleInputChange} />
+        <div className="event-form-group">
+          <Input label="Email" name="cliente_email" type="email" value={formData.cliente_email} placeholder="ejemplo@correo.com (opcional)" onChange={handleInputChange} />
+          {errors.cliente_email && <span className="field-error-text" style={{ color: '#ef4444', fontSize: '0.8rem', marginTop: '4px', display: 'block' }}>{errors.cliente_email}</span>}
+        </div>
+        <div className="event-form-group">
+          <Input label="Teléfono" name="cliente_numero" type="tel" value={formData.cliente_numero} placeholder="Teléfono (opcional)" onChange={handleInputChange} />
+          {errors.cliente_numero && <span className="field-error-text" style={{ color: '#ef4444', fontSize: '0.8rem', marginTop: '4px', display: 'block' }}>{errors.cliente_numero}</span>}
+        </div>
+        <div className="event-form-group">
+          <Input label="Cantidad de invitados" name="cant_invitados_display" type="number" value={formData.cant_invitados_display} placeholder="0" onChange={handleInputChange} />
+        </div>
       </div>
 
       <div className="event-form-row4">
         <div className="event-form-group">
-          <label className="event-form-label" htmlFor="salon_id">Salón</label>
+          <label className="event-form-label" htmlFor="salon_id">Salón *</label>
           <select id="salon_id" name="salon_id" className="event-form-select" value={formData.salon_id} onChange={handleInputChange}>
             <option value={0}>Seleccione un salón</option>
-            {salons?.map((s) => (<option key={s.id} value={s.id ?? 0}>{s.nombre}</option>))}
+            {salons?.map((s) => (<option key={s.id ?? 0} value={s.id ?? 0}>{s.nombre}</option>))}
           </select>
+          {errors.salon_id && <span className="field-error-text" style={{ color: '#ef4444', fontSize: '0.8rem', marginTop: '4px', display: 'block' }}>{errors.salon_id}</span>}
         </div>
 
         <div className="event-form-group">
           <DateSelect
-            label="Fecha del evento"
+            label="Fecha del evento *"
             name="fecha_evento"
             value={formData.fecha_evento}
-            min={minDate}
+            min={initialData?.id ? undefined : minDate}
             onChange={(value) => handleChange('fecha_evento', value)}
             error={Boolean(errors.fecha_evento)}
             errorMessage={errors.fecha_evento}
@@ -358,7 +367,7 @@ export default function EventForm({ salons, menus, bebidas, onSubmit, initialDat
 
         <div className="event-form-group">
           <TimeSelect
-            label="Hora de inicio"
+            label="Hora de inicio *"
             name="hora_inicio"
             value={formData.hora_inicio}
             onChange={(value) => handleChange('hora_inicio', value)}
@@ -369,7 +378,7 @@ export default function EventForm({ salons, menus, bebidas, onSubmit, initialDat
 
         <div className="event-form-group">
           <TimeSelect
-            label="Hora de finalización"
+            label="Hora de finalización *"
             name="hora_fin"
             value={formData.hora_fin}
             onChange={(value) => handleChange('hora_fin', value)}
@@ -383,10 +392,10 @@ export default function EventForm({ salons, menus, bebidas, onSubmit, initialDat
         {/* BLOQUE DE MENÚ */}
         <div className="event-form-gastro-box">
           <div className="event-form-group">
-            <label className="event-form-label" htmlFor="menu_id">Menú</label>
+            <label className="event-form-label" htmlFor="menu_id">Menú (Opcional)</label>
             <select id="menu_id" className="event-form-select" value={menuIdActual} onChange={(e) => setMenuIdActual(Number(e.target.value))}>
               <option value={0}>Seleccione un menú</option>
-              {menus?.map((m) => (<option key={m.id} value={m.id}>{m.nombre}</option>))}
+              {menus?.map((m, idx) => (<option key={m.id ?? idx} value={m.id ?? 0}>{m.nombre}</option>))}
             </select>
           </div>
           <div className="event-form-action-row">
@@ -400,10 +409,10 @@ export default function EventForm({ salons, menus, bebidas, onSubmit, initialDat
         {/* BLOQUE DE BEBIDA */}
         <div className="event-form-gastro-box">
           <div className="event-form-group">
-            <label className="event-form-label" htmlFor="bebida_id">Bebida</label>
+            <label className="event-form-label" htmlFor="bebida_id">Bebida (Opcional)</label>
             <select id="bebida_id" className="event-form-select" value={bebidaIdActual} onChange={(e) => setBebidaIdActual(Number(e.target.value))}>
               <option value={0}>Seleccione una bebida</option>
-              {bebidas?.map((b) => (<option key={b.id} value={b.id}>{b.nombre}</option>))}
+              {bebidas?.map((b, idx) => (<option key={b.id ?? idx} value={b.id ?? 0}>{b.nombre}</option>))}
             </select>
           </div>
           <div className="event-form-action-row">
@@ -415,11 +424,11 @@ export default function EventForm({ salons, menus, bebidas, onSubmit, initialDat
         </div>
       </div>
 
-      {/* ESPACIO PREPARADO FIJO (No cambia de tamaño, previene saltos) */}
+      {/* ESPACIO PREPARADO FIJO */}
       <div className="event-form-fixed-badge-container custom-scrollbar">
         {!tieneItemsAgregados ? (
           <div className="event-form-placeholder-text">
-            Sin menús ni bebidas seleccionadas para la reserva.
+            Sin menús ni bebidas seleccionadas por el momento.
           </div>
         ) : (
           <>

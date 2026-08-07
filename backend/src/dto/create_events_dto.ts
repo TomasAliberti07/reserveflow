@@ -4,6 +4,7 @@ import { Type } from 'class-transformer';
 export enum EventEstado {
   PENDIENTE = 'pendiente',
   CONFIRMADO = 'confirmado',
+  FINALIZADO = 'finalizado',
   CANCELADO = 'cancelado',
 }
 
@@ -58,7 +59,6 @@ export class CreateEventDto {
   @IsString()
   @IsOptional()
   notas?: string;
-
 
   @IsArray()
   @IsOptional()

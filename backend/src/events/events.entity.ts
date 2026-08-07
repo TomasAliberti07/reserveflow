@@ -12,6 +12,9 @@ import { Salones } from '../salons/salons.entity';
 import { Eventomenus } from './eventomenus.entity';
 import { Eventobebida } from './eventobebida.entity';
 
+// Opcional: Definimos un tipo para TypeScript
+export type EventoEstado = 'pendiente' | 'confirmado' | 'finalizado' | 'cancelado';
+
 @Entity('evento')
 export class Event {
   @PrimaryGeneratedColumn()
@@ -24,8 +27,6 @@ export class Event {
   @JoinColumn({ name: 'salon_id' })
   salon!: Salones;
 
-  // 🚀 RELACIÓN AGREGADA: Declaramos explícitamente la columna numérica users_id
-  // para que coincida exacto con tu tabla de MySQL y no tire error en el .create()
   @Column({ type: 'int', name: 'users_id' })
   users_id!: number;
 
@@ -38,10 +39,10 @@ export class Event {
   @Column({ length: 150 })
   cliente_email!: string;
 
-  @Column({ length: 20, nullable: true }) // Permitimos nullable: true en concordancia con el "YES" de tu tabla
+  @Column({ length: 20, nullable: true }) 
   cliente_numero?: string;
 
-  @Column({ type: 'int', default: 0 }) // Le asignamos el valor por defecto en la entidad tal como tu DB (YES 0)
+  @Column({ type: 'int', default: 0 }) 
   cant_invitados!: number;
 
   @Column({ type: 'datetime' })
@@ -50,8 +51,12 @@ export class Event {
   @Column({ type: 'datetime' })
   finaliza!: Date;
 
-  @Column({ length: 50, default: 'pendiente' })
-  estado!: string; // pendiente | confirmado | cancelado
+  @Column({
+    type: 'enum',
+    enum: ['pendiente', 'confirmado', 'finalizado', 'cancelado'],
+    default: 'pendiente',
+  })
+  estado!: EventoEstado;
 
   @Column({ type: 'text', nullable: true })
   notas?: string;

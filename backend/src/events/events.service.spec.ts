@@ -1,14 +1,16 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
 import { EventsService } from './events.service';
 import { Event } from './events.entity';
 import { Salones } from '../salons/salons.entity';
 import { Eventomenus } from './eventomenus.entity';
 import { Eventobebida } from './eventobebida.entity';
+import { Bebida } from '../bebida/bebida.entity';
 
 describe('EventsService', () => {
   let service: EventsService;
-  let eventRepository: { find: jest.Mock };
+  let eventRepository: { find: jest.Mock; save: jest.Mock };
 
   beforeEach(async () => {
     eventRepository = {
@@ -34,6 +36,16 @@ describe('EventsService', () => {
         {
           provide: getRepositoryToken(Eventobebida),
           useValue: {},
+        },
+        {
+          provide: getRepositoryToken(Bebida),
+          useValue: {},
+        },
+        {
+          provide: DataSource,
+          useValue: {
+            transaction: jest.fn(),
+          },
         },
       ],
     }).compile();

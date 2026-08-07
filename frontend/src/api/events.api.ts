@@ -12,8 +12,11 @@ export interface EventoDTO {
   cant_invitados: number;
   comienzo: string;
   finaliza: string;
-  estado?: "pendiente" | "confirmado" | "cancelado";
+  estado?: "pendiente" | "confirmado" | "finalizado" | "cancelado";
   notas?: string;
+  // Agregamos las relaciones opcionales para la creación/edición de menús y bebidas
+  menus?: Array<{ menu_id: number; cant: number }>;
+  bebidas?: Array<{ bebida_id: number; cant: number }>;
 }
 
 const getAuthHeaders = () => {

@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param, UseGuards, Req } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Delete,
+  Body,
+  Param,
+  UseGuards,
+  Req,
+  ParseIntPipe,
+} from '@nestjs/common';
 import { EventsService } from './events.service';
 import { JwtAuthGuard } from '../auth/jwt_auth_guard';
 import { CreateEventDto } from '../dto/create_events_dto';
@@ -23,7 +34,7 @@ export class EventsController {
 
   @Patch(':id')
   update(
-    @Param('id') id: number,
+    @Param('id', ParseIntPipe) id: number,
     @Body() updateEventDto: UpdateEventDto,
     @Req() req: Request,
   ) {
@@ -32,7 +43,7 @@ export class EventsController {
   }
 
   @Delete(':id')
-  delete(@Param('id') id: number, @Req() req: Request) {
+  delete(@Param('id', ParseIntPipe) id: number, @Req() req: Request) {
     const userId = (req.user as any)?.id;
     return this.eventsService.delete(id, userId);
   }

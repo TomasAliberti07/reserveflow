@@ -1,18 +1,15 @@
 .card {
   background-color: #0f172a;
-  padding: 22px;
-  border-radius: 14px;
+  padding: 1rem 1rem 0.85rem;
+  border-radius: 6px;
   color: white;
   border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
-
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.22);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
   min-height: 170px;
-
   display: flex;
   flex-direction: column;
   justify-content: center;
-
   position: relative;
   overflow: hidden;
 }
@@ -29,14 +26,15 @@
 }
 
 .card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.28);
+  border-color: rgba(96, 165, 250, 0.25);
 }
 
 .card-header {
   font-size: 13px;
   color: #94a3b8;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -49,6 +47,6 @@
 }
 
 .stat-value {
-  font-size: 32px;
+  font-size: 2rem;
   font-weight: bold;
 }

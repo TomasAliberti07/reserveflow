@@ -28,6 +28,10 @@
   border-color: #444;
 }
 
+.bebida-dashboard-grid {
+  margin-bottom: 1.5rem;
+}
+
 .bebida-dashboard-search {
   margin-bottom: 1.5rem;
   max-width: 400px;
@@ -109,14 +113,14 @@
 
 .bebida-stats {
   display: flex;
-  gap: 1.5rem;
+  gap: 1rem;
   margin-bottom: 1.5rem;
   flex-wrap: wrap;
 }
 
 .bebida-stats .card {
-  flex: 1;
-  min-width: 200px;
+  flex: 1 1 180px;
+  min-width: 180px;
 }
 
 .bebida-dashboard-no-results {

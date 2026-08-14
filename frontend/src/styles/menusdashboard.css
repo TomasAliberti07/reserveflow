@@ -27,6 +27,10 @@
   border-color: #444;
 }
 
+.menu-dashboard-grid-stats {
+  margin-bottom: 1.5rem;
+}
+
 .menu-dashboard-search-row {
   display: flex;
   gap: 1rem;
@@ -152,14 +156,14 @@
 
 .menu-stats {
   display: flex;
-  gap: 1.5rem;
+  gap: 1rem;
   margin-bottom: 1.5rem;
   flex-wrap: wrap;
 }
 
 .menu-stats .card {
-  flex: 1;
-  min-width: 200px;
+  flex: 1 1 180px;
+  min-width: 180px;
 }
 
 .menu-dashboard-no-results {

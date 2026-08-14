@@ -11,6 +11,7 @@ import { BebidaModule } from './bebida/bebida.module';
 import { MenusModule } from './menus/menus.module';
 import { ProveedoresModule } from './proveedores/proveedores.module';
 import { PedidosModule } from './pedidos/pedidos.module';
+import { DashboardModule } from './dashboard/dashboard.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { PedidosModule } from './pedidos/pedidos.module';
     MenusModule,
     ProveedoresModule,
     PedidosModule,
+    DashboardModule,
   ],
   controllers: [AppController],
   providers: [AppService],

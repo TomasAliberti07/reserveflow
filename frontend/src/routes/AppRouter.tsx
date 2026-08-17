@@ -6,6 +6,7 @@ import Events from '../pages/Events';
 import Bebida from '../pages/Bebida';
 import Menus from '../pages/Menus';
 import Proveedores from '../pages/Proveedores';
+import Settings from '../pages/Settings';
 
 export function AppRouter() {
   return (
@@ -21,6 +22,7 @@ export function AppRouter() {
         <Route path="/bebidas" element={<Bebida />} />
         <Route path="/menus" element={<Menus />} />
         <Route path="/proveedores" element={<Proveedores />} />
+        <Route path="/settings" element={<Settings/>}/>
       </Routes>
     </BrowserRouter>
   );

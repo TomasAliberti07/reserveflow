@@ -1,0 +1,218 @@
+/* Contenedor Principal */
+.settings-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+/* Estado de Carga */
+.settings-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem;
+  color: #94a3b8;
+  gap: 1rem;
+}
+
+.spinner {
+  font-size: 2rem;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Tarjeta de Perfil (Avatar + Info) */
+.profile-header-card {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  background-color: #121824;
+  border: 1px solid #1e293b;
+  padding: 1.5rem 2rem;
+  border-radius: 12px;
+}
+
+.avatar-circle {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-size: 1.8rem;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+  flex-shrink: 0;
+}
+
+.profile-info-text {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.profile-name {
+  margin: 0;
+  font-size: 1.3rem;
+  color: #f8fafc;
+  font-weight: 600;
+}
+
+.profile-email {
+  margin: 0.2rem 0 0 0;
+  color: #94a3b8;
+  font-size: 0.88rem;
+}
+
+/* Tarjetas de Contenido */
+.settings-card {
+  background-color: #121824;
+  border: 1px solid #1e293b;
+  padding: 1.75rem;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.settings-card-title {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #f1f5f9;
+  border-bottom: 1px solid #1e293b;
+  padding-bottom: 0.75rem;
+  font-weight: 600;
+}
+
+/* Estructura de Formularios */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.form-group label {
+  font-size: 0.85rem;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+/* Filas con Ancho Ajustado */
+.input-action-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  max-width: 480px;
+}
+
+/* Modo Lectura (Texto estático) */
+.read-only-value {
+  flex: 1;
+  background-color: #0b0f17;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  padding: 0.6rem 1rem;
+  color: #f8fafc;
+  font-size: 0.95rem;
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+}
+
+.read-only-value.disabled {
+  color: #64748b;
+  background-color: rgba(11, 15, 23, 0.5);
+}
+
+/* Modo Edición (Input activo) */
+.settings-input {
+  flex: 1;
+  background-color: #0b0f17;
+  border: 1px solid #1e293b;
+  border-radius: 8px;
+  padding: 0.6rem 1rem;
+  color: #f8fafc;
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.settings-input.active {
+  border-color: #8b5cf6;
+  box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.25);
+}
+
+/* Botones de Acción (Lápiz, Guardar, Cancelar) */
+.btn-icon {
+  background: transparent;
+  border: none;
+  color: #a78bfa;
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.btn-icon:hover {
+  background-color: #1e293b;
+  color: #c4b5fd;
+}
+
+.btn-icon.save {
+  color: #10b981;
+}
+
+.btn-icon.cancel {
+  color: #ef4444;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 0.25rem;
+}
+
+/* Formulario de Seguridad */
+.password-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.password-form .settings-input {
+  max-width: 480px;
+}
+
+.submit-btn {
+  align-self: flex-start;
+  margin-top: 0.5rem;
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  color: #ffffff;
+  border: none;
+  padding: 0.7rem 1.4rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.1s;
+}
+
+.submit-btn:hover {
+  opacity: 0.95;
+}
+
+.submit-btn:active {
+  transform: scale(0.98);
+}

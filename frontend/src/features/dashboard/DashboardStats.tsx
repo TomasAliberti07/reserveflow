@@ -1,18 +1,21 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { FaSpinner, FaCog } from "react-icons/fa";
+
 import Card from "../../components/ui/card";
 import Grid from "../../components/ui/grid";
-import type {
-  SalonesStatsDTO,
-  EventosStatsDTO,
-  PedidosStatsDTO,
-} from "../../api/dashboard.api";
+
 import {
   getSalonesStats,
   getEventosStats,
   getPedidosStats,
 } from "../../api/dashboard.api";
-import { FaSpinner } from "react-icons/fa";
+import type {
+  SalonesStatsDTO,
+  EventosStatsDTO,
+  PedidosStatsDTO,
+} from "../../api/dashboard.api";
+
 import "../../styles/dashboardstats.css";
 
 const DashboardStats: React.FC = () => {
@@ -175,6 +178,14 @@ const DashboardStats: React.FC = () => {
               {action.label}
             </button>
           ))}
+          <button
+            type="button"
+            className="quick-access-button icon-button"
+            onClick={() => navigate("/settings")}
+            title="Configuración"
+          >
+            <FaCog /> Configuración
+          </button>
         </div>
       </div>
     </>

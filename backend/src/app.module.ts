@@ -19,14 +19,14 @@ import { DashboardModule } from './dashboard/dashboard.module';
       isGlobal: true,
     }),
     TypeOrmModule.forRoot({
-      type: 'mysql',
-      host: "127.0.0.1",
-      port: 3306,
-      username: "root",
-      password: "TRIMLY2025",
-      database: "reserve",
+     type: 'postgres',
+      url: process.env.DATABASE_URL,
       autoLoadEntities: true,
-      synchronize: false,
+      synchronize: true,
+      ssl: {
+    rejectUnauthorized: false, 
+  },
+
     }),
     UsersModule,
     SalonsModule,

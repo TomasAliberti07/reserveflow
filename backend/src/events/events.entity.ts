@@ -45,10 +45,10 @@ export class Event {
   @Column({ type: 'int', default: 0 }) 
   cant_invitados!: number;
 
-  @Column({ type: 'datetime' })
+  @Column({ type: 'timestamp' })
   comienzo!: Date;
 
-  @Column({ type: 'datetime' })
+  @Column({ type: 'timestamp' })
   finaliza!: Date;
 
   @Column({

@@ -5,49 +5,92 @@
   justify-content: center;
   align-items: center;
 }
+
+/* Título principal */
 .login-title {
   margin-bottom: 2rem;
   font-size: 3rem;
   font-weight: 700;
   letter-spacing: 1px;
-
-  background: linear-gradient(
-    90deg,
-    #1e3a8a, 
-    #020617  
-  );
-
+  background: linear-gradient(90deg, #60a5fa, #ffffff);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-
   background-clip: text;
   color: transparent;
 }
 
-
-.login-container .login-card {
+/* Contenedores Principales */
+.login-card,
+.modal-card {
   width: 100%;
   max-width: 420px;
   padding: 2rem;
-
   background: linear-gradient(
     180deg,
-    rgba(55, 65, 81, 0.85),
-    rgba(2, 6, 23, 0.9)
-    );
-
+    rgba(55, 65, 81, 0.95),
+    rgba(2, 6, 23, 0.95)
+  );
   border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
+
 .login-form-title {
-  margin-bottom: 1rem;
-
-  font-size: 1rem;
-  font-weight: 500;
-
+  margin-bottom: 1.5rem;
+  font-size: 1.25rem;
+  font-weight: 600;
   color: #f8fafc;
   text-shadow: 0 0 4px rgba(59, 130, 246, 0.35);
+}
+
+/* ===== GRUPOS DE FORMULARIO (LOGIN Y MODAL) ===== */
+
+/* Espacio vertical entre cada campo entero */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1.25rem; 
+}
+
+/* Margen inferior del Label para despegarlo del Input */
+.form-group label {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #e2e8f0;
+}
+
+/* Estilos de los Inputs */
+.form-group input {
+  width: 100%;
+  padding: 0.65rem 0.85rem;
+  border-radius: 8px;
+  background-color: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-group input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
+}
+
+.form-group input::placeholder {
+  color: #94a3b8;
+  opacity: 0.8;
+  font-size: 0.825rem;
+}
+
+/* Mensajes de error */
+.input-error {
+  display: block;
+  color: #f87171;
+  font-size: 0.75rem;
+  margin-top: 0.3rem;
 }
 
 /* ===== MODAL ===== */
@@ -62,29 +105,12 @@
   z-index: 9999;
 }
 
-/* Card del modal (independiente del login-container) */
-.modal-card {
-  width: 100%;
-  max-width: 420px;
-  padding: 2rem;
-
-  background: linear-gradient(
-    180deg,
-    rgba(55, 65, 81, 0.95),
-    rgba(2, 6, 23, 0.95)
-  );
-
-  border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-/* Acciones del modal */
 .modal-actions {
   display: flex;
   justify-content: flex-end;
+  align-items: center;
   gap: 12px;
-  margin-top: 1.25rem;
+  margin-top: 1.5rem;
 }
 
 /* Botones */
@@ -98,12 +124,11 @@
   color: #e5e7eb;
 }
 
-/* Link crear cuenta */
 .link-button {
-  margin-top: 1rem;
   background: none;
   border: none;
   color: #60a5fa;
   cursor: pointer;
   text-decoration: underline;
+  font-size: 0.9rem;
 }

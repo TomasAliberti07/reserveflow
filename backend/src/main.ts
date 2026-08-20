@@ -5,17 +5,23 @@ import { ValidationPipe } from '@nestjs/common';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // CORS para permitir requests desde el frontend
+  const frontendUrl = process.env.FRONTEND_URL;
+  const allowedOrigins = [
+    'http://localhost:5173',
+    'http://localhost:3000',
+    ...(frontendUrl ? [frontendUrl] : []),
+  ];
+
   app.enableCors({
-    origin: 'http://localhost:5173',
+    origin: allowedOrigins,
     credentials: true,
   });
 
   app.useGlobalPipes(
     new ValidationPipe({
-      whitelist: true,// elimina props no declaradas en el DTO
-      forbidNonWhitelisted: true, // tira error si mandan de más
-      transform: true,// transforma payload a la clase DTO
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
     }),
   );
 

@@ -10,7 +10,7 @@ export class Bebida {
   @Column({ type: 'varchar', length: 100 })
   nombre!: string;
 
-  @Column({ type: 'tinyint', width: 1 })
+  @Column({ type: 'smallint', width: 1 })
   alcohol!: number;
 
   @Column({ type: 'decimal', precision: 10, scale: 2 })
@@ -35,9 +35,9 @@ export class Bebida {
   @JoinColumn({ name: 'proveedor_id' })
   proveedor!: Proveedor | null;
 
-  @CreateDateColumn({ type: 'datetime' })
+  @CreateDateColumn({ type: 'timestamp' })
   creacion!: Date;
 
-  @UpdateDateColumn({ type: 'datetime' })
+  @UpdateDateColumn({ type: 'timestamp' })
   actualizacion!: Date;
 }

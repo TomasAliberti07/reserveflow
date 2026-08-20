@@ -32,12 +32,12 @@ export class Salones {
   @Column({ type: 'int' })
   maxcapacidad!: number;
 
-  @Column({  type: 'tinyint', default: 1 })
+  @Column({  type: 'smallint', default: 1 })
   estado!: number;
 
-  @CreateDateColumn({ type: 'datetime' })
+  @CreateDateColumn({ type: 'timestamp' })
     creacion!: Date;
   
-  @UpdateDateColumn({ type: 'datetime' })
+  @UpdateDateColumn({ type: 'timestamp' })
     actualizacion!: Date;
 }

@@ -6,6 +6,9 @@ import CrearCuentaModal from "../features/auth/Crearcuentamodal";
 import axios from "axios"; 
 import "../styles/login.card.css";
 
+// Uso de variable de entorno dinámico
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -18,18 +21,15 @@ export default function Login() {
     setError(""); 
 
     try {
-      // 2. Llamada real al backend
-      const response = await axios.post("http://localhost:3000/auth/login", {
+      const response = await axios.post(`${BASE_URL}/auth/login`, {
         email: email,
         password: password,
       });
 
-      // 3. Guardamos el token que nos da NestJS
-      // Asegúrate de que tu backend devuelva 'access_token'
       const token = response.data.access_token; 
       
       if (token) {
-        localStorage.setItem("token", token); // <--- AQUÍ SE GUARDA LA LLAVE
+        localStorage.setItem("token", token);
         navigate("/dashboard");
       }
     } catch (err: any) {
@@ -46,25 +46,31 @@ export default function Login() {
         <h2 className="login-form-title">Inicio de sesión</h2>
 
         <form onSubmit={handleSubmit}>
-          {error && <p style={{ color: "red", fontSize: "14px" }}>{error}</p>}
+          {error && <p style={{ color: "#ef4444", fontSize: "14px", marginBottom: "1rem" }}>{error}</p>}
           
-          <Input
-            label="Email"
-            type="email"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-          />
-          <Input
-            label="Contraseña"
-            type="password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-          />
+          <div className="form-group">
+            <Input
+              label="Email"
+              type="email"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+            />
+          </div>
 
-          <Button type="submit">Ingresar</Button>
+          <div className="form-group">
+            <Input
+              label="Contraseña"
+              type="password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+            />
+          </div>
+
+          <Button type="submit" className="btn-primary">Ingresar</Button>
         </form>
 
         <button
+          type="button"
           className="link-button"
           onClick={() => setOpenCrearCuenta(true)}
         >

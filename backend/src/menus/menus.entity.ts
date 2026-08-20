@@ -25,7 +25,7 @@ export class Menus {
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   precio!: string;
 
-  @Column({ type: 'tinyint', width: 1 })
+  @Column({ type: 'smallint', width: 1 })
   disponible!: number;
 
   @Column({ type: 'varchar', length: 500, nullable: true })
@@ -49,13 +49,13 @@ export class Menus {
 
   @CreateDateColumn({ 
     name: 'creacion', 
-    type: 'datetime' 
+    type: 'timestamp' 
   })
   createdAt!: Date; 
 
   @UpdateDateColumn({ 
     name: 'actualizacion', 
-    type: 'datetime' 
+    type: 'timestamp' 
   })
   updatedAt!: Date; 
 }

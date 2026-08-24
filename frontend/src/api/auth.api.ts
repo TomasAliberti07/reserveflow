@@ -1,8 +1,7 @@
 import axios from "axios";
 
-// Quitamos el "/api" para alinearlo directamente con NestJS
-const API_URL = "http://localhost:3000/auth";
 
+const API_URL =import.meta.env.VITE_API_URL || 'http://localhost:3000';
 export interface UserProfileDTO {
   id: number;
   nombre: string;

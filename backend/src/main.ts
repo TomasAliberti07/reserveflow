@@ -6,15 +6,28 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   const frontendUrl = process.env.FRONTEND_URL;
+  
+  // Limpiamos cualquier barra final que pueda venir en las variables de entorno
+  const cleanFrontendUrl = frontendUrl?.replace(/\/$/, '');
+
   const allowedOrigins = [
     'http://localhost:5173',
     'http://localhost:3000',
-    ...(frontendUrl ? [frontendUrl] : []),
+    ...(cleanFrontendUrl ? [cleanFrontendUrl] : []),
   ];
 
   app.enableCors({
-    origin: allowedOrigins,
+    origin: (origin, callback) => {
+
+      if (!origin || allowedOrigins.includes(origin.replace(/\/$/, ''))) {
+        callback(null, true);
+      } else {
+        callback(new Error('Bloqueado por política de CORS'));
+      }
+    },
     credentials: true,
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    allowedHeaders: 'Content-Type, Accept, Authorization',
   });
 
   app.useGlobalPipes(

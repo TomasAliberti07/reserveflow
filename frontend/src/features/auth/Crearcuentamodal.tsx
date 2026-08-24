@@ -15,8 +15,9 @@ const onlyLetters = (value: string) =>
 
 const onlyNumbers = (value: string) => value.replace(/\D/g, "");
 
+// Agregamos el # y otros símbolos habituales (!@#$%^&*()_+-=[]{}|;:',.<>/?)
 const passwordRegex =
-  /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&._-])[A-Za-z\d@$!%*?&._-]{8,}$/;
+  /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?])[A-Za-z\d!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]{8,}$/;
 
 export default function CrearCuentaModal({
   open,

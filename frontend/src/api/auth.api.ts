@@ -37,7 +37,7 @@ api.interceptors.request.use((config) => {
 
 // Registro de usuario
 export const registerUser = async (userData: any) => {
-  const response = await api.post("/register", userData);
+  const response = await api.post("/auth/register", userData);
   return response.data;
 };
 

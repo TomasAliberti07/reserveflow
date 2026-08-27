@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
-import { FaSyncAlt, FaClock, FaCheckCircle, FaTruck, FaTimesCircle } from "react-icons/fa";
+import { FaClock, FaCheckCircle, FaTruck, FaTimesCircle } from "react-icons/fa";
 import { getPedidos, updateEstadoPedido, type Pedido, type EstadoPedido } from "../../api/pedidos.api";
+import { getBebidas } from "../../api/bebida.api";
+import { getMenus } from "../../api/menus.api";
 import "../../styles/pedidosdashboard.css";
 
 interface Props {
@@ -9,23 +11,45 @@ interface Props {
 
 export default function PedidoHistorial({ onMostrarPopup }: Props) {
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
+  const [catalogoBebidas, setCatalogoBebidas] = useState<any[]>([]);
+  const [catalogoMenus, setCatalogoMenus] = useState<any[]>([]);
   const [cargando, setCargando] = useState(false);
 
-  const cargarHistorial = async () => {
+  // Cargar catálogos de bebidas y menús para mapear los nombres
+  useEffect(() => {
+    const cargarCatalogos = async () => {
+      try {
+        const [bebidas, menus] = await Promise.all([getBebidas(), getMenus()]);
+        setCatalogoBebidas(bebidas);
+        setCatalogoMenus(menus);
+      } catch (error) {
+        console.error("Error al cargar catálogos:", error);
+      }
+    };
+    cargarCatalogos();
+  }, []);
+
+  const cargarHistorial = async (mostrarCargando = false) => {
     try {
-      setCargando(true);
+      if (mostrarCargando) setCargando(true);
       const data = await getPedidos();
       setPedidos(data);
     } catch (error) {
       console.error(error);
       onMostrarPopup("Error", "No se pudo obtener el historial de pedidos.", "error");
     } finally {
-      setCargando(false);
+      if (mostrarCargando) setCargando(false);
     }
   };
 
   useEffect(() => {
-    cargarHistorial();
+    cargarHistorial(true);
+
+    const interval = setInterval(() => {
+      cargarHistorial(false);
+    }, 10000);
+
+    return () => clearInterval(interval);
   }, []);
 
   const handleStatusChange = async (pedidoId: string, nuevoEstado: EstadoPedido) => {
@@ -56,21 +80,33 @@ export default function PedidoHistorial({ onMostrarPopup }: Props) {
     }
   };
 
+  // Resuelve el nombre buscando en los objetos anidados o cruzando con los catálogos
+  const obtenerNombreArticulo = (it: any) => {
+    if (it.nombre) return it.nombre;
+    if (it.bebida?.nombre) return it.bebida.nombre;
+    if (it.menu?.nombre) return it.menu.nombre;
+
+    const idBebida = it.bebidaId ?? it.bebida_id;
+    if (idBebida) {
+      const encontrada = catalogoBebidas.find((b) => Number(b.id) === Number(idBebida));
+      if (encontrada) return encontrada.nombre;
+    }
+
+    const idMenu = it.menuId ?? it.menu_id;
+    if (idMenu) {
+      const encontrado = catalogoMenus.find((m) => Number(m.id) === Number(idMenu));
+      if (encontrado) return encontrado.nombre;
+    }
+
+    return "Artículo";
+  };
+
   return (
     <div className="pedidos-container" style={{ marginTop: "20px" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
         <h3 className="proveedor-dashboard-inventory-title" style={{ margin: 0 }}>
           Historial de Pedidos
         </h3>
-        <button
-          type="button"
-          onClick={cargarHistorial}
-          disabled={cargando}
-          className="pedidos-btn-add"
-          style={{ marginTop: 0, padding: "8px 12px" }}
-        >
-          <FaSyncAlt className={cargando ? "animate-spin" : ""} /> Refrescar
-        </button>
       </div>
 
       <div className="pedidos-form-card" style={{ padding: "0px", overflowX: "auto" }}>
@@ -114,14 +150,11 @@ export default function PedidoHistorial({ onMostrarPopup }: Props) {
                     </td>
                     <td style={{ padding: "12px 16px" }}>
                       <ul style={{ margin: 0, paddingLeft: "16px", fontSize: "14px", color: "#cbd5e1" }}>
-                        {pedido.items?.map((it, idx) => {
-                          const tagTipo = it.bebidaId ? "(Bebida)" : it.menuId ? "(Menú)" : "";
-                          return (
-                            <li key={it.id || idx}>
-                              {it.cantidad}x {tagTipo ? `Artículo ${tagTipo}` : "Artículo"}
-                            </li>
-                          );
-                        })}
+                        {pedido.items?.map((it, idx) => (
+                          <li key={it.id || idx}>
+                            {it.cantidad}x {obtenerNombreArticulo(it)}
+                          </li>
+                        ))}
                       </ul>
                     </td>
                     <td style={{ padding: "12px 16px" }}>

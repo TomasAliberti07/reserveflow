@@ -17,6 +17,9 @@ export default function BebidaDashboard() {
   const [bebidaParaEditar, setBebidaParaEditar] = useState<BebidaDTO | null>(null);
   const [busqueda, setBusqueda] = useState("");
 
+  // Estado para el popup de confirmación de eliminación
+  const [bebidaAEliminar, setBebidaAEliminar] = useState<BebidaDTO | null>(null);
+
   const [popupOpen, setPopupOpen] = useState(false);
   const [popupTitle, setPopupTitle] = useState<string | undefined>(undefined);
   const [popupMessage, setPopupMessage] = useState("");
@@ -83,15 +86,21 @@ export default function BebidaDashboard() {
     }
   };
 
-  const handleEliminarBebida = async (id?: number) => {
-    if (id == null) return;
+  const confirmarEliminarBebida = (bebida: BebidaDTO) => {
+    setBebidaAEliminar(bebida);
+  };
+
+  const handleEliminarBebida = async () => {
+    if (!bebidaAEliminar?.id) return;
 
     try {
-      await deleteBebida(id);
-      setBebidas((prev) => prev.filter((bebida) => bebida.id !== id));
+      await deleteBebida(bebidaAEliminar.id);
+      setBebidas((prev) => prev.filter((bebida) => bebida.id !== bebidaAEliminar.id));
+      setBebidaAEliminar(null);
       mostrarPopup("Bebida eliminada", "La bebida se eliminó correctamente.", "success");
     } catch (error) {
       console.error("Error eliminando bebida:", error);
+      setBebidaAEliminar(null);
       mostrarPopup("Error", "No se pudo eliminar la bebida. Intenta nuevamente.", "error");
     }
   };
@@ -118,6 +127,7 @@ export default function BebidaDashboard() {
         bebidaInicial={bebidaParaEditar ?? undefined}
       />
 
+      {/* Popup genérico de notificaciones */}
       <Popup
         open={popupOpen}
         title={popupTitle}
@@ -126,9 +136,20 @@ export default function BebidaDashboard() {
         onClose={() => setPopupOpen(false)}
       />
 
+      {/* Popup de Confirmación de Borrado cargando la bebida seleccionada */}
+      {bebidaAEliminar && (
+        <Popup
+          open={Boolean(bebidaAEliminar)}
+          title="Confirmar eliminación"
+          message={`¿Estás seguro de que deseas eliminar la bebida "${bebidaAEliminar.nombre}"? Esta acción no se puede deshacer.`}
+          type="error"
+          onClose={() => setBebidaAEliminar(null)}
+          onConfirm={handleEliminarBebida}
+        />
+      )}
+
       <hr className="bebida-dashboard-hr" />
       
-      {/* Barra de búsqueda */}
       <div className="bebida-dashboard-search">
         <input
           type="text"
@@ -139,7 +160,6 @@ export default function BebidaDashboard() {
         />
       </div>
 
-      {/* Lista de bebidas usando Grid */}
       <h3 className="bebida-dashboard-inventory-title">Inventario</h3>
       
       {cargando ? (
@@ -147,7 +167,6 @@ export default function BebidaDashboard() {
       ) : (
         <Grid cols={3} gap={4}>
           {bebidasFiltradas.map((bebida: any, index) => {
-            // Evaluamos si la bebida maneja stock
             const manejaStock = bebida.tieneStock ?? bebida.manejaStock ?? (bebida.stock > 0);
 
             return (
@@ -170,7 +189,7 @@ export default function BebidaDashboard() {
                       type="button"
                       className="bebida-dashboard-card-action"
                       aria-label="Eliminar bebida"
-                      onClick={() => handleEliminarBebida(bebida.id)}
+                      onClick={() => confirmarEliminarBebida(bebida)}
                     >
                       <FaTrash />
                     </button>

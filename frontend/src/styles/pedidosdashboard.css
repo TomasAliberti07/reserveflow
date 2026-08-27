@@ -77,3 +77,15 @@
   display: flex;
   align-items: center;
 }
+
+.pedidos-input::-webkit-outer-spin-button,
+.pedidos-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+
+.pedidos-input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}

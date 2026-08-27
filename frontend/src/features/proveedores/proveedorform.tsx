@@ -9,12 +9,14 @@ interface ProveedorFormProps {
   proveedorInicial?: Proveedor;
 }
 
+// Función helper para descartar cualquier carácter que no sea número
+const onlyNumbers = (value: string) => value.replace(/\D/g, "");
+
 export default function ProveedorForm({ onSubmit, onCancel, proveedorInicial }: ProveedorFormProps) {
   const [nombre, setNombre] = useState("");
   const [cel, setCel] = useState("");
   const [rubro, setRubro] = useState("");
   const [tipo, setTipo] = useState<"BEBIDA" | "MENU">("BEBIDA");
-
 
   useEffect(() => {
     if (proveedorInicial) {
@@ -35,9 +37,10 @@ export default function ProveedorForm({ onSubmit, onCancel, proveedorInicial }: 
     if (!nombre.trim() || !cel.trim()) return;
 
     onSubmit({
-      nombre,
-      cel,
-      rubro: rubro.trim() ? rubro : undefined, // Si queda vacío viaja como undefined (el backend lo procesa null)
+      // Punto 3: Normalización a minúsculas limpia de espacios extras
+      nombre: nombre.trim().toLowerCase(),
+      cel: cel.trim(),
+      rubro: rubro.trim() ? rubro.trim().toLowerCase() : undefined,
       tipo,
     });
   };
@@ -49,7 +52,7 @@ export default function ProveedorForm({ onSubmit, onCancel, proveedorInicial }: 
         type="text"
         value={nombre}
         onChange={(e) => setNombre(e.target.value)}
-        placeholder="Ej: Distribuidora Quilmes"
+        placeholder="Ej: distribuidora quilmes"
         required
       />
 
@@ -57,8 +60,10 @@ export default function ProveedorForm({ onSubmit, onCancel, proveedorInicial }: 
         label="Celular / Teléfono *"
         type="text"
         value={cel}
-        onChange={(e) => setCel(e.target.value)}
-        placeholder="Ej: +54 9 3541 XXXXXX"
+        // Punto 2: Remueve cualquier letra o símbolo al instante y limita la extensión
+        onChange={(e) => setCel(onlyNumbers(e.target.value))}
+        maxLength={15}
+        placeholder="Ej: 3541123456"
         required
       />
 
@@ -67,10 +72,9 @@ export default function ProveedorForm({ onSubmit, onCancel, proveedorInicial }: 
         type="text"
         value={rubro}
         onChange={(e) => setRubro(e.target.value)}
-        placeholder="Ej: Cervezas, gaseosas, fiambres..."
+        placeholder="Ej: cervezas, gaseosas, fiambres..."
       />
 
-      {/* Select adaptado al layout oscuro usando tu clase de inputs para uniformidad */}
       <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
         <label style={{ color: "#f8fafc", fontSize: "0.9rem" }}>Tipo de Proveedor *</label>
         <select

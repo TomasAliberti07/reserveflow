@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { FaUser, FaRegEdit, FaSave, FaTimes, FaSpinner } from "react-icons/fa";
 import { getUserProfile, updateUserProfile, changePassword } from "../../api/auth.api";
+import PopUp from "../../components/ui/popup"; 
 import "../../styles/settings.css";
 
 interface UserProfile {
@@ -13,7 +14,6 @@ interface UserProfile {
 
 type EditableField = "nombre" | "apellido" | "telefono";
 
-// Función auxiliar para enmascarar el email
 const maskEmail = (email: string): string => {
   if (!email || !email.includes("@")) return "Sin correo registrado";
 
@@ -45,6 +45,18 @@ export default function SettingsDashboard() {
     confirmarPassword: "",
   });
 
+  // Estado para controlar el PopUp de componentes/ui/popup.tsx
+  const [popupState, setPopupState] = useState<{
+    isOpen: boolean;
+    type: "success" | "error" | "info";
+    title?: string;
+    message: string;
+  }>({
+    isOpen: false,
+    type: "info",
+    message: "",
+  });
+
   useEffect(() => {
     fetchProfile();
   }, []);
@@ -53,8 +65,6 @@ export default function SettingsDashboard() {
     try {
       setLoading(true);
       const data = await getUserProfile();
-
-      // Mapeo flexible por si la API retorna en data o data.user
       const rawUser = (data as any).user || data;
 
       setUser({
@@ -69,6 +79,15 @@ export default function SettingsDashboard() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const showPopup = (message: string, type: "success" | "error" | "info" = "info", title?: string) => {
+    setPopupState({
+      isOpen: true,
+      type,
+      title,
+      message,
+    });
   };
 
   const handleEdit = (field: EditableField) => {
@@ -87,26 +106,48 @@ export default function SettingsDashboard() {
       await updateUserProfile({ [field]: tempValue });
       setUser(updatedUser);
       setEditingField(null);
+      showPopup("Información actualizada correctamente.", "success", "Éxito");
     } catch (err) {
-      alert("Error al actualizar la información.");
+      showPopup("Error al actualizar la información.", "error", "Error");
     }
   };
 
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (passwords.passwordNueva !== passwords.confirmarPassword) {
-      alert("Las contraseñas no coinciden.");
+
+    // 1. Validación: La nueva contraseña debe tener mínimo 8 caracteres, una mayúscula, un número y un símbolo
+    const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/;
+    if (!passwordRegex.test(passwords.passwordNueva)) {
+      showPopup(
+        "La nueva contraseña debe tener al menos 8 caracteres, una letra mayúscula, un número y un símbolo.",
+        "error",
+        "Formato de contraseña inválido"
+      );
       return;
     }
+
+    // 2. Validación: No se puede repetir la contraseña actual
+    if (passwords.passwordActual === passwords.passwordNueva) {
+      showPopup("La nueva contraseña no puede ser igual a la contraseña actual.", "error", "Validación");
+      return;
+    }
+
+    // 3. Validación: Confirmación de contraseña
+    if (passwords.passwordNueva !== passwords.confirmarPassword) {
+      showPopup("Las contraseñas no coinciden.", "error", "Validación");
+      return;
+    }
+
     try {
       await changePassword({
         passwordActual: passwords.passwordActual,
         passwordNueva: passwords.passwordNueva,
       });
-      alert("Contraseña actualizada correctamente.");
+      showPopup("Contraseña actualizada correctamente.", "success", "Éxito");
       setPasswords({ passwordActual: "", passwordNueva: "", confirmarPassword: "" });
-    } catch (err) {
-      alert("Error al cambiar la contraseña.");
+    } catch (err: any) {
+      const errorMsg = err.response?.data?.message || "Error al cambiar la contraseña.";
+      showPopup(Array.isArray(errorMsg) ? errorMsg.join(", ") : errorMsg, "error", "Error");
     }
   };
 
@@ -285,6 +326,17 @@ export default function SettingsDashboard() {
           </button>
         </form>
       </div>
+
+      {/* Uso del componente UI PopUp */}
+      {popupState.isOpen && (
+        <PopUp
+          open={popupState.isOpen}
+          type={popupState.type}
+          title={popupState.title}
+          message={popupState.message}
+          onClose={() => setPopupState({ ...popupState, isOpen: false })}
+        />
+      )}
     </div>
   );
 }

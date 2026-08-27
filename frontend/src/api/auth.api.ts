@@ -1,7 +1,7 @@
 import axios from "axios";
 
-
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
 export interface UserProfileDTO {
   id: number;
   nombre: string;
@@ -43,7 +43,7 @@ export const registerUser = async (userData: any) => {
 
 // Obtener perfil
 export const getUserProfile = async (): Promise<UserProfileDTO> => {
-  const response = await api.get<UserProfileDTO>("/profile");
+  const response = await api.get<UserProfileDTO>("/auth/profile");
   return response.data;
 };
 
@@ -51,7 +51,7 @@ export const getUserProfile = async (): Promise<UserProfileDTO> => {
 export const updateUserProfile = async (
   data: UpdateProfileDTO
 ): Promise<UserProfileDTO> => {
-  const response = await api.patch<UserProfileDTO>("/profile", data);
+  const response = await api.patch<UserProfileDTO>("/auth/profile", data);
   return response.data;
 };
 
@@ -59,6 +59,6 @@ export const updateUserProfile = async (
 export const changePassword = async (
   data: ChangePasswordDTO
 ): Promise<{ message: string }> => {
-  const response = await api.patch<{ message: string }>("/change-password", data);
+  const response = await api.patch<{ message: string }>("/auth/change-password", data);
   return response.data;
 };

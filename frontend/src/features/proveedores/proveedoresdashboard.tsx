@@ -5,7 +5,7 @@ import Grid from "../../components/ui/grid";
 import AgregarProveedor from "./agregarproveedor";
 import Popup from "../../components/ui/popup";
 import PedidosFeature from "./pedidos";
-import PedidoHistorial from "./pedidohistorial"; // <-- Importamos el historial
+import PedidoHistorial from "./pedidohistorial"; 
 import { getProveedores, createProveedor, updateProveedor, deleteProveedor } from "../../api/proveedores.api";
 import type { Proveedor, CreateProveedorDto } from "../../api/proveedores.api";
 import "../../styles/proveedoresdashboard.css"; 
@@ -14,7 +14,6 @@ export default function ProveedoresDashboard() {
   const [proveedores, setProveedores] = useState<Proveedor[]>([]);
   const [cargando, setCargando] = useState(true);
   
-  // Ampliamos el estado para incluir "HISTORIAL"
   const [vistaActiva, setVistaActiva] = useState<"PROVEEDORES" | "PEDIDOS" | "HISTORIAL">("PROVEEDORES");
 
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
@@ -25,6 +24,10 @@ export default function ProveedoresDashboard() {
   const [popupTitle, setPopupTitle] = useState<string | undefined>(undefined);
   const [popupMessage, setPopupMessage] = useState("");
   const [popupType, setPopupType] = useState<"success" | "error" | "info">("info");
+
+  // Estados para el popup de confirmación de eliminación
+  const [proveedorAEliminar, setProveedorAEliminar] = useState<number | null>(null);
+  const [confirmarEliminarOpen, setConfirmarEliminarOpen] = useState(false);
 
   useEffect(() => {
     cargarProveedores();
@@ -90,15 +93,26 @@ export default function ProveedoresDashboard() {
     }
   };
 
-  const handleEliminarProveedor = async (id?: number) => {
+  // Función para abrir el popup de confirmación
+  const solicitarEliminacion = (id?: number) => {
     if (id == null) return;
+    setProveedorAEliminar(id);
+    setConfirmarEliminarOpen(true);
+  };
+
+  // Función que ejecuta el borrado si el usuario confirma
+  const confirmarEliminacion = async () => {
+    if (proveedorAEliminar == null) return;
     try {
-      await deleteProveedor(id);
-      setProveedores((prev) => prev.filter((p) => p.id !== id));
+      await deleteProveedor(proveedorAEliminar);
+      setProveedores((prev) => prev.filter((p) => p.id !== proveedorAEliminar));
       mostrarPopup("Proveedor eliminado", "El proveedor se eliminó correctamente.", "success");
     } catch (error) {
       console.error("Error eliminando proveedor:", error);
       mostrarPopup("Error", "No se pudo eliminar el proveedor. Intenta nuevamente.", "error");
+    } finally {
+      setConfirmarEliminarOpen(false);
+      setProveedorAEliminar(null);
     }
   };
 
@@ -180,12 +194,23 @@ export default function ProveedoresDashboard() {
         proveedorInicial={proveedorParaEditar ?? undefined}
       />
 
+      {/* Popup de notificaciones generales */}
       <Popup
         open={popupOpen}
         title={popupTitle}
         message={popupMessage}
         type={popupType}
         onClose={() => setPopupOpen(false)}
+      />
+
+      {/* Popup de confirmación de eliminación */}
+      <Popup
+        open={confirmarEliminarOpen}
+        title="¿Eliminar proveedor?"
+        message="¿Estás seguro de que querés eliminar este proveedor? Esta acción no se puede deshacer."
+        type="info"
+        onClose={() => setConfirmarEliminarOpen(false)}
+        onConfirm={confirmarEliminacion} 
       />
 
       <hr className="proveedor-dashboard-hr" />
@@ -224,7 +249,7 @@ export default function ProveedoresDashboard() {
                       <button
                         type="button"
                         className="proveedor-dashboard-card-action"
-                        onClick={() => handleEliminarProveedor(p.id)}
+                        onClick={() => solicitarEliminacion(p.id)}
                       >
                         <FaTrash />
                       </button>

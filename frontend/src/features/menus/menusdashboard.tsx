@@ -115,15 +115,17 @@ export default function MenuDashboard() {
     setPopupTitle("Confirmar eliminación");
     setPopupMessage("¿Estás seguro de que deseas eliminar este menú?");
     setPopupType("info");
-    setPopupAction(() => () => ejecutarEliminacion(id));
+    setPopupAction(() => ejecutarEliminacion);
     setPopupOpen(true);
   };
 
-  const ejecutarEliminacion = async (id: number) => {
+  const ejecutarEliminacion = async () => {
+    if (idAEliminar == null) return;
+
     setPopupOpen(false);
     try {
-      await deleteMenu(id);
-      setMenus((prev) => prev.filter((menu) => menu.id !== id));
+      await deleteMenu(idAEliminar);
+      setMenus((prev) => prev.filter((menu) => menu.id !== idAEliminar));
       mostrarPopupNotificacion(
         "Menú eliminado",
         "El menú se eliminó correctamente.",

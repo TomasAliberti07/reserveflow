@@ -20,9 +20,6 @@ export default function MenuDashboard() {
   const [categoriaFiltro, setCategoriaFiltro] = useState<string>("");
   const [dietaEspecificaFiltro, setDietaEspecificaFiltro] = useState<string>("");
 
-  // Estado para gestionar la confirmación de eliminación
-  const [idAEliminar, setIdAEliminar] = useState<number | null>(null);
-
   // Estados del Popup genérico
   const [popupOpen, setPopupOpen] = useState(false);
   const [popupTitle, setPopupTitle] = useState<string | undefined>(undefined);
@@ -109,23 +106,11 @@ export default function MenuDashboard() {
     setPopupOpen(true);
   };
 
-  const solicitarConfirmacionEliminar = (id?: number) => {
-    if (id == null) return;
-    setIdAEliminar(id);
-    setPopupTitle("Confirmar eliminación");
-    setPopupMessage("¿Estás seguro de que deseas eliminar este menú?");
-    setPopupType("info");
-    setPopupAction(() => ejecutarEliminacion);
-    setPopupOpen(true);
-  };
-
-  const ejecutarEliminacion = async () => {
-    if (idAEliminar == null) return;
-
+  const ejecutarEliminacion = async (id: number) => {
     setPopupOpen(false);
     try {
-      await deleteMenu(idAEliminar);
-      setMenus((prev) => prev.filter((menu) => menu.id !== idAEliminar));
+      await deleteMenu(id);
+      setMenus((prev) => prev.filter((menu) => menu.id !== id));
       mostrarPopupNotificacion(
         "Menú eliminado",
         "El menú se eliminó correctamente.",
@@ -138,9 +123,16 @@ export default function MenuDashboard() {
         "No se pudo eliminar el menú. Intenta nuevamente.",
         "error"
       );
-    } finally {
-      setIdAEliminar(null);
     }
+  };
+
+  const solicitarConfirmacionEliminar = (id?: number) => {
+    if (id == null) return;
+    setPopupTitle("Confirmar eliminación");
+    setPopupMessage("¿Estás seguro de que deseas eliminar este menú?");
+    setPopupType("info");
+    setPopupAction(() => () => ejecutarEliminacion(id));
+    setPopupOpen(true);
   };
 
   const handleGuardarMenu = async (menuData: Partial<MenusDTO>) => {
@@ -203,10 +195,7 @@ export default function MenuDashboard() {
         title={popupTitle}
         message={popupMessage}
         type={popupType}
-        onClose={() => {
-          setPopupOpen(false);
-          setIdAEliminar(null);
-        }}
+        onClose={() => setPopupOpen(false)}
         onConfirm={popupAction}
       />
 

@@ -28,8 +28,10 @@ export default function AgregarSalon({
   const [localizacion, setLocalizacion] = useState("");
   const [mincapacidad, setMincapacidad] = useState("");
   const [maxcapacidad, setMaxcapacidad] = useState("");
-  const [estado, setEstado] = useState(1);
+  const [estado, setEstado] = useState<number>(1);
   const { popup, fieldError, showError, closePopup } = useValidationPopup();
+
+  const esEdicion = Boolean(salonInicial?.id != null);
 
   useEffect(() => {
     if (open) {
@@ -45,7 +47,13 @@ export default function AgregarSalon({
           ? String(salonInicial.maxcapacidad)
           : ""
       );
-      setEstado(salonInicial?.estado ?? 1);
+
+      // Parseo estricto a entero (1 o 0) respetando los tipos de TS
+      const estadoParseado = salonInicial?.estado != null
+        ? (Number(salonInicial.estado) === 1 ? 1 : 0)
+        : 1;
+
+      setEstado(estadoParseado);
     } else {
       setNombre("");
       setLocalizacion("");
@@ -115,12 +123,13 @@ export default function AgregarSalon({
       return;
     }
 
-    const salon = {
+    // Mapeo final garantizando smallint (1 o 0)
+    const salon: Partial<SalonsDTO> = {
       nombre: normalizeString(nombre),
       localizacion: localizacion.trim(),
       mincapacidad: minCap,
       maxcapacidad: maxCap,
-      estado,
+      estado: esEdicion ? (Number(estado) === 1 ? 1 : 0) : 1,
     };
 
     await onSubmit(salon);
@@ -134,7 +143,7 @@ export default function AgregarSalon({
       <div className="modal-overlay">
         <div className="salons-agregar-card">
           <h2 className="salons-agregar-title">
-            {salonInicial ? "Editar Salón" : "Nuevo Salón"}
+            {esEdicion ? "Editar Salón" : "Nuevo Salón"}
           </h2>
           <form onSubmit={manejarSubmit} className="salons-agregar-form">
             <Input
@@ -191,14 +200,17 @@ export default function AgregarSalon({
               }
             />
 
-            <label style={{ display: "flex", gap: "0.5rem", marginTop: "1rem" }}>
-              <input
-                type="checkbox"
-                checked={estado === 1}
-                onChange={(e) => setEstado(e.target.checked ? 1 : 0)}
-              />
-              Salón Activo
-            </label>
+            {/* Checkbox visible únicamente cuando se está editando */}
+            {esEdicion && (
+              <label style={{ display: "flex", gap: "0.5rem", marginTop: "1rem", cursor: "pointer" }}>
+                <input
+                  type="checkbox"
+                  checked={Number(estado) === 1}
+                  onChange={(e) => setEstado(e.target.checked ? 1 : 0)}
+                />
+                Salón Activo
+              </label>
+            )}
 
             <div className="salons-agregar-buttons">
               <Button type="submit" className="salons-agregar-submit">

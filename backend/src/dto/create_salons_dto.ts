@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsInt, IsOptional, Matches, Min } from 'class-validator';
+import { IsString, IsNotEmpty, IsInt, IsOptional, Matches, Min, IsIn } from 'class-validator';
 import { Transform } from 'class-transformer';
 
 export class CreateSalonsDto {
@@ -24,6 +24,12 @@ export class CreateSalonsDto {
   maxcapacidad!: number;
 
   @IsOptional()
-  @Transform(({ value }) => value === 'true' || value === true || value === 1) 
-  estado?: 1 | 0; 
+  @Transform(({ value }) => {
+    if (value === '1' || value === 1 || value === true || value === 'true') return 1;
+    if (value === '0' || value === 0 || value === false || value === 'false') return 0;
+    return value;
+  })
+  @IsInt({ message: 'El estado debe ser un número entero' })
+  @IsIn([0, 1], { message: 'El estado debe ser 0 o 1' })
+  estado?: number;
 }

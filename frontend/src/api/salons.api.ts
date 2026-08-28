@@ -52,14 +52,18 @@ export const createSalon = async (
 };
 
 export const updateSalon = async (id: number, data: Partial<SalonsDTO>) => {
+  const payload = {
+    ...data,
+    ...(data.estado !== undefined && { estado: Number(data.estado) ? 1 : 0 }),
+  };
+
   const response = await axios.patch(
     `${API_URL}/salons/${id}`,
-    data,
+    payload,
     getAuthHeaders()
   );
   return response.data;
 };
-
 export const deleteSalon = async (id: number) => {
   const response = await axios.delete(
     `${API_URL}/salons/${id}`,

@@ -37,18 +37,20 @@ export default function MenuForm({ onSubmit, onCancel, menuInicial }: MenuFormPr
   const [precio, setPrecio] = useState("");
   const [dietaEspecifica, setDietaEspecifica] = useState("");
   
-  // Nuevos estados para asociar el proveedor de insumos de cocina
+  // Estados para asociar el proveedor de insumos de cocina
   const [proveedorId, setProveedorId] = useState<number | string>("");
   const [proveedores, setProveedores] = useState<Proveedor[]>([]);
 
   const { popup, fieldError, showError, closePopup } = useValidationPopup();
+
+  const esEdicion = Boolean(menuInicial?.id != null);
 
   // Cargar datos iniciales del menú si estamos editando
   useEffect(() => {
     setNombre(menuInicial?.nombre ?? "");
     setCategoria(menuInicial?.categoria ?? opcionesCategorias[0]);
     setDescripcion(menuInicial?.descripcion ?? "");
-    setDisponible(menuInicial?.disponible === 1);
+    setDisponible(menuInicial?.disponible === 1 || menuInicial?.disponible === undefined);
     setPrecio(menuInicial?.precio ? String(menuInicial.precio) : "");
     setDietaEspecifica(menuInicial?.dieta_especifica ?? "");
     setProveedorId(menuInicial?.proveedor_id || "");
@@ -59,7 +61,6 @@ export default function MenuForm({ onSubmit, onCancel, menuInicial }: MenuFormPr
     const cargarProveedoresMenu = async () => {
       try {
         const todosLosProveedores = await getProveedores();
-        // Filtramos para quedarnos estrictamente con insumos de cocina/menú
         const soloMenus = todosLosProveedores.filter(p => p.tipo === "MENU");
         setProveedores(soloMenus);
       } catch (error) {
@@ -92,12 +93,11 @@ export default function MenuForm({ onSubmit, onCancel, menuInicial }: MenuFormPr
 
     const menu = {
       nombre: normalizeString(nombre),
-      categoria,
+      categoria: normalizeString(categoria),
       descripcion: descripcion ? normalizeString(descripcion) : null,
-      disponible: disponible ? 1 : 0,
+      disponible: esEdicion ? (disponible ? 1 : 0) : 1, // 1 por defecto al crear
       precio: String(precio),
-      dieta_especifica: categoria === "Especial" && dietaEspecifica ? dietaEspecifica : null,
-      // Se inyecta la relación relacional mandándolo como Number o null
+      dieta_especifica: categoria === "Especial" && dietaEspecifica ? normalizeString(dietaEspecifica) : null,
       proveedor_id: proveedorId ? Number(proveedorId) : null
     };
 
@@ -156,7 +156,6 @@ export default function MenuForm({ onSubmit, onCancel, menuInicial }: MenuFormPr
           </div>
         )}
 
-        {/* Nuevo Selector de Proveedores de Menú */}
         <div className="form-group">
           <label>Proveedor de Insumos</label>
           <select
@@ -179,7 +178,7 @@ export default function MenuForm({ onSubmit, onCancel, menuInicial }: MenuFormPr
             value={descripcion}
             onChange={(e) => setDescripcion(e.target.value)}
             className="menu-textarea"
-            rows={3}
+            rows={2}
             placeholder="Describe el menú..."
           />
         </div>
@@ -193,14 +192,17 @@ export default function MenuForm({ onSubmit, onCancel, menuInicial }: MenuFormPr
           errorMessage={fieldError?.field === "precio" ? fieldError.message : undefined}
         />
 
-        <label className="checkbox-label">
-          <input
-            type="checkbox"
-            checked={disponible}
-            onChange={(e) => setDisponible(e.target.checked)}
-          />
-          <span>Disponible</span>
-        </label>
+        {/* Checkbox visible únicamente en modo edición */}
+        {esEdicion && (
+          <label className="checkbox-label" style={{ display: "flex", gap: "0.5rem", marginTop: "0.5rem", cursor: "pointer" }}>
+            <input
+              type="checkbox"
+              checked={disponible}
+              onChange={(e) => setDisponible(e.target.checked)}
+            />
+            <span>Disponible</span>
+          </label>
+        )}
 
         <div className="menu-form-actions">
           <Button type="button" onClick={onCancel} className="menu-cancel-button">Cancelar</Button>

@@ -20,10 +20,15 @@ export default function MenuDashboard() {
   const [categoriaFiltro, setCategoriaFiltro] = useState<string>("");
   const [dietaEspecificaFiltro, setDietaEspecificaFiltro] = useState<string>("");
 
+  // Estado para gestionar la confirmación de eliminación
+  const [idAEliminar, setIdAEliminar] = useState<number | null>(null);
+
+  // Estados del Popup genérico
   const [popupOpen, setPopupOpen] = useState(false);
   const [popupTitle, setPopupTitle] = useState<string | undefined>(undefined);
   const [popupMessage, setPopupMessage] = useState("");
   const [popupType, setPopupType] = useState<"success" | "error" | "info">("info");
+  const [popupAction, setPopupAction] = useState<(() => void) | undefined>(undefined);
 
   useEffect(() => {
     cargarMenus();
@@ -49,20 +54,24 @@ export default function MenuDashboard() {
       (menu.categoria ?? "").toLowerCase().includes(busqueda.toLowerCase()) ||
       (menu.descripcion ?? "").toLowerCase().includes(busqueda.toLowerCase())
     )
-    .filter((menu) => categoriaFiltro === "" || menu.categoria === categoriaFiltro)
+    .filter((menu) => 
+      categoriaFiltro === "" || 
+      (menu.categoria ?? "").toLowerCase() === categoriaFiltro.toLowerCase()
+    )
     .filter((menu) => {
-      if (dietaEspecificaFiltro === "" || categoriaFiltro !== "Especial") {
+      if (dietaEspecificaFiltro === "" || categoriaFiltro.toLowerCase() !== "especial") {
         return true;
       }
-      return menu.dieta_especifica === dietaEspecificaFiltro;
+      return (menu.dieta_especifica ?? "").toLowerCase() === dietaEspecificaFiltro.toLowerCase();
     });
 
   const menusPorCategoria = categorias.reduce((acc, categoria) => {
-    acc[categoria] = menusFiltrados.filter((menu) => menu.categoria === categoria);
+    acc[categoria] = menusFiltrados.filter(
+      (menu) => (menu.categoria ?? "").toLowerCase() === categoria.toLowerCase()
+    );
     return acc;
   }, {} as Record<string, MenusDTO[]>);
 
-  // Helper para asignar la clase CSS correcta según la dieta
   const obtenerClaseDieta = (dieta?: string) => {
     if (!dieta) return "";
     const normalizada = dieta.toLowerCase();
@@ -88,41 +97,80 @@ export default function MenuDashboard() {
     setMenuParaEditar(null);
   };
 
-  const mostrarPopup = (title: string, message: string, type: "success" | "error" | "info") => {
+  const mostrarPopupNotificacion = (
+    title: string,
+    message: string,
+    type: "success" | "error" | "info"
+  ) => {
     setPopupTitle(title);
     setPopupMessage(message);
     setPopupType(type);
+    setPopupAction(undefined);
     setPopupOpen(true);
+  };
+
+  const solicitarConfirmacionEliminar = (id?: number) => {
+    if (id == null) return;
+    setIdAEliminar(id);
+    setPopupTitle("Confirmar eliminación");
+    setPopupMessage("¿Estás seguro de que deseas eliminar este menú?");
+    setPopupType("info");
+    setPopupAction(() => () => ejecutarEliminacion(id));
+    setPopupOpen(true);
+  };
+
+  const ejecutarEliminacion = async (id: number) => {
+    setPopupOpen(false);
+    try {
+      await deleteMenu(id);
+      setMenus((prev) => prev.filter((menu) => menu.id !== id));
+      mostrarPopupNotificacion(
+        "Menú eliminado",
+        "El menú se eliminó correctamente.",
+        "success"
+      );
+    } catch (error) {
+      console.error("Error eliminando menu:", error);
+      mostrarPopupNotificacion(
+        "Error",
+        "No se pudo eliminar el menú. Intenta nuevamente.",
+        "error"
+      );
+    } finally {
+      setIdAEliminar(null);
+    }
   };
 
   const handleGuardarMenu = async (menuData: Partial<MenusDTO>) => {
     try {
       if (menuParaEditar?.id != null) {
-        const menuActualizado = await updateMenu(menuParaEditar.id, menuData); // Se utiliza PATCH internamente tal como definimos previamente
-        setMenus((prev) => prev.map((item) => (item.id === menuParaEditar.id ? menuActualizado : item)));
+        const menuActualizado = await updateMenu(menuParaEditar.id, menuData);
+        setMenus((prev) =>
+          prev.map((item) => (item.id === menuParaEditar.id ? menuActualizado : item))
+        );
         cerrarFormulario();
-        mostrarPopup("Menú actualizado", "Los datos del menú se guardaron correctamente.", "success");
+        mostrarPopupNotificacion(
+          "Menú actualizado",
+          "Los datos del menú se guardaron correctamente.",
+          "success"
+        );
       } else {
         const menuCreado = await createMenu(menuData);
         setMenus((prev) => [...prev, menuCreado]);
         cerrarFormulario();
-        mostrarPopup("Menú agregado", "El menú se guardó correctamente.", "success");
+        mostrarPopupNotificacion(
+          "Menú agregado",
+          "El menú se guardó correctamente.",
+          "success"
+        );
       }
     } catch (error) {
       console.error("Error guardando menu:", error);
-      mostrarPopup("Error", "No se pudo guardar el menú. Intenta nuevamente.", "error");
-    }
-  };
-
-  const handleEliminarMenu = async (id?: number) => {
-    if (id == null) return;
-    try {
-      await deleteMenu(id);
-      setMenus((prev) => prev.filter((menu) => menu.id !== id));
-      mostrarPopup("Menú eliminado", "El menú se eliminó correctamente.", "success");
-    } catch (error) {
-      console.error("Error eliminando menu:", error);
-      mostrarPopup("Error", "No se pudo eliminar el menú. Intenta nuevamente.", "error");
+      mostrarPopupNotificacion(
+        "Error",
+        "No se pudo guardar el menú. Intenta nuevamente.",
+        "error"
+      );
     }
   };
 
@@ -153,11 +201,15 @@ export default function MenuDashboard() {
         title={popupTitle}
         message={popupMessage}
         type={popupType}
-        onClose={() => setPopupOpen(false)}
+        onClose={() => {
+          setPopupOpen(false);
+          setIdAEliminar(null);
+        }}
+        onConfirm={popupAction}
       />
 
       <hr className="menu-dashboard-hr" />
-      
+
       {/* Barra de búsqueda */}
       <div className="menu-dashboard-search-row">
         <input
@@ -185,9 +237,13 @@ export default function MenuDashboard() {
         <select
           value={dietaEspecificaFiltro}
           onChange={(e) => setDietaEspecificaFiltro(e.target.value)}
-          disabled={categoriaFiltro !== "Especial"}
+          disabled={categoriaFiltro.toLowerCase() !== "especial"}
           className="menu-dashboard-search-select"
-          title={categoriaFiltro !== "Especial" ? "Selecciona 'Especial' en la categoría para usar este filtro" : ""}
+          title={
+            categoriaFiltro.toLowerCase() !== "especial"
+              ? "Selecciona 'Especial' en la categoría para usar este filtro"
+              : ""
+          }
         >
           <option value="">Todas las dietas</option>
           <option value="Celiaco">Celiaco</option>
@@ -198,26 +254,34 @@ export default function MenuDashboard() {
       </div>
 
       <h3 className="menu-dashboard-inventory-title">Menús Disponibles</h3>
-      
+
       {cargando ? (
         <p className="menu-dashboard-no-results">Cargando menús...</p>
       ) : (
         <>
-          {categorias.map((categoria) => (
-            menusPorCategoria[categoria].length > 0 ? (
+          {categorias.map((categoria) =>
+            menusPorCategoria[categoria] && menusPorCategoria[categoria].length > 0 ? (
               <div key={categoria} className="menu-dashboard-category-group">
                 <h4 className="menu-dashboard-category-title">{categoria}</h4>
-                
-                {/* Contenedor horizontal directo de las tarjetas (Flex) */}
+
                 <div className="menu-dashboard-grid">
                   {menusPorCategoria[categoria].map((menu) => (
                     <div key={menu.id} className="menu-dashboard-card">
                       <div className="menu-dashboard-card-header">
-                        <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "8px",
+                            flexWrap: "wrap",
+                          }}
+                        >
                           <h4 className="menu-dashboard-card-title">{menu.nombre}</h4>
                           {menu.dieta_especifica && (
-                            <span 
-                              className={`menu-badge-dieta ${obtenerClaseDieta(menu.dieta_especifica)}`}
+                            <span
+                              className={`menu-badge-dieta ${obtenerClaseDieta(
+                                menu.dieta_especifica
+                              )}`}
                               title={`Dieta: ${menu.dieta_especifica}`}
                             >
                               {menu.dieta_especifica}
@@ -237,7 +301,7 @@ export default function MenuDashboard() {
                             type="button"
                             className="menu-dashboard-card-action"
                             aria-label="Eliminar menú"
-                            onClick={() => handleEliminarMenu(menu.id)}
+                            onClick={() => solicitarConfirmacionEliminar(menu.id)}
                           >
                             <FaTrash />
                           </button>
@@ -250,12 +314,16 @@ export default function MenuDashboard() {
                         <p className="menu-dashboard-card-detail">
                           <strong>Descripción:</strong> {menu.descripcion}
                         </p>
-                        <p className="menu-dashboard-card-detail">Precio: <strong>${menu.precio}</strong></p>
                         <p className="menu-dashboard-card-detail">
-                          Estado: 
-                          <span 
-                            className="menu-dashboard-status" 
-                            style={{ color: menu.disponible === 1 ? "#4dff4d" : "#ff4d4d" }}
+                          Precio: <strong>${menu.precio}</strong>
+                        </p>
+                        <p className="menu-dashboard-card-detail">
+                          Estado:
+                          <span
+                            className="menu-dashboard-status"
+                            style={{
+                              color: menu.disponible === 1 ? "#4dff4d" : "#ff4d4d",
+                            }}
                           >
                             {menu.disponible === 1 ? " Disponible" : " No disponible"}
                           </span>
@@ -266,7 +334,7 @@ export default function MenuDashboard() {
                 </div>
               </div>
             ) : null
-          ))}
+          )}
         </>
       )}
 
